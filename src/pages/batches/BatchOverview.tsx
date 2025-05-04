@@ -1,22 +1,32 @@
-// src/pages/BatchOverview.tsx
-
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-  Box, Typography, Tabs, Tab, Button, Stack, CircularProgress
+  Box,
+  Typography,
+  Tabs,
+  Tab,
+  Button,
+  Stack,
+  CircularProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  MenuItem,
+  Autocomplete,
 } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
 import AnimatedPage from '../../components/AnimatedPage';
 import PageHeader from '../../components/PageHeader';
 import { getBatchById, getClassSchedulesByBatch } from '../../api/batch';
-import { getBatchStudents } from '../../api/student';
-import { getAllSyllabi } from '../../api/syllabus';
+import { getBatchStudents, mapStudentToBatch } from '../../api/student';
+import { getAllStudents } from '../../api/student';
 import { BatchResponse, ClassScheduleResponse } from '../../types/batch';
-import { MappedBatchStudentResponse } from '../../types/student';
-import { SyllabusResponse } from '../../types/syllabus';
+import { MapStudentToBatchRequest, MappedBatchStudentResponse, StudentResponse } from '../../types/student';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import AnimatedCard from '../../components/AnimatedCard';
 
-const BatchOverview = () => {
+const BatchOverview: React.FC = () => {
   const { batchId } = useParams<{ batchId: string }>();
   const navigate = useNavigate();
 
@@ -24,16 +34,24 @@ const BatchOverview = () => {
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState(0);
 
-  // Tab data
+  // Students Tab
   const [students, setStudents] = useState<MappedBatchStudentResponse[]>([]);
   const [studentsLoading, setStudentsLoading] = useState(false);
 
+  // Class Schedule Tab
   const [schedule, setSchedule] = useState<ClassScheduleResponse[]>([]);
   const [scheduleLoading, setScheduleLoading] = useState(false);
 
-  const [syllabus, setSyllabus] = useState<SyllabusResponse | null>(null);
-  const [syllabusLoading, setSyllabusLoading] = useState(false);
+  // Add to Batch Modal
+  const [addModalOpen, setAddModalOpen] = useState(false);
+  const [allStudents, setAllStudents] = useState<StudentResponse[]>([]);
+  const [selectedStudent, setSelectedStudent] = useState<StudentResponse | null>(null);
+  const [amount, setAmount] = useState('');
+  const [joinedAt, setJoinedAt] = useState('');
+  const [addLoading, setAddLoading] = useState(false);
+  const [addError, setAddError] = useState<string | null>(null);
 
+  // Fetch batch details
   useEffect(() => {
     const fetchBatch = async () => {
       setLoading(true);
@@ -49,6 +67,7 @@ const BatchOverview = () => {
     fetchBatch();
   }, [batchId]);
 
+  // Fetch students/class schedule on tab change
   useEffect(() => {
     if (tab === 0 && batchId) {
       setStudentsLoading(true);
@@ -60,18 +79,15 @@ const BatchOverview = () => {
       getClassSchedulesByBatch(Number(batchId))
         .then(setSchedule)
         .finally(() => setScheduleLoading(false));
-    } else if (tab === 2 && batch) {
-      setSyllabusLoading(true);
-      getAllSyllabi()
-        .then((syllabi) => {
-          // Adjust this logic if your batch has a syllabus id
-          const found = syllabi.find((s) => batch.syllabus?.[0]?.id === s.id);
-          setSyllabus(found || null);
-        })
-        .finally(() => setSyllabusLoading(false));
     }
-    // eslint-disable-next-line
-  }, [tab, batchId, batch]);
+  }, [tab, batchId]);
+
+  // Fetch all students when modal opens
+  useEffect(() => {
+    if (addModalOpen) {
+      getAllStudents().then(setAllStudents);
+    }
+  }, [addModalOpen]);
 
   // Columns for students
   const studentColumns: GridColDef[] = [
@@ -107,6 +123,41 @@ const BatchOverview = () => {
       valueFormatter: (params) => (params.value ? 'Active' : 'Inactive'),
     },
   ];
+
+  // Add to Batch handler
+  const handleAddToBatch = async () => {
+    if (!selectedStudent || !amount || !joinedAt) {
+      setAddError('All fields are required.');
+      return;
+    }
+    setAddLoading(true);
+    setAddError(null);
+    try {
+      await mapStudentToBatch(selectedStudent.id, {
+        batch_id: Number(batchId),
+        amount: Number(amount),
+        joined_at: joinedAt,
+      });
+      setAddModalOpen(false);
+      setSelectedStudent(null);
+      setAmount('');
+      setJoinedAt('');
+      // Refresh students list
+      setStudentsLoading(true);
+      getBatchStudents(Number(batchId))
+        .then(setStudents)
+        .finally(() => setStudentsLoading(false));
+    } catch (err: any) {
+      setAddError(
+        err?.response?.data?.detail ||
+        err?.detail ||
+        err?.message ||
+        'Failed to add student to batch.'
+      );
+    } finally {
+      setAddLoading(false);
+    }
+  };
 
   return (
     <AnimatedPage>
@@ -148,7 +199,7 @@ const BatchOverview = () => {
                   <Box display="flex" justifyContent="flex-end" mb={2}>
                     <Button
                       variant="contained"
-                      onClick={() => alert('Show add student to batch modal!')}
+                      onClick={() => setAddModalOpen(true)}
                     >
                       Add to Batch
                     </Button>
@@ -183,22 +234,26 @@ const BatchOverview = () => {
               )}
               {tab === 2 && (
                 <Box>
-                  {syllabusLoading ? (
-                    <CircularProgress />
-                  ) : syllabus ? (
-                    <Box>
-                      <Typography variant="h6">{syllabus.name}</Typography>
-                      <Box mt={2}>
-                        <Typography variant="subtitle1">Topics:</Typography>
-                        <Stack direction="row" flexWrap="wrap" gap={1} mt={1}>
-                          {syllabus.topics.map((topic, idx) => (
-                            <Box key={idx} px={2} py={1} bgcolor="#374151" color="#fff" borderRadius={2}>
-                              {topic}
-                            </Box>
-                          ))}
-                        </Stack>
-                      </Box>
-                    </Box>
+                  {/* Syllabus Tab: Display syllabus from batch.syllabus */}
+                  {batch.syllabus && batch.syllabus.length > 0 ? (
+                    <Stack spacing={3}>
+                      {batch.syllabus.map((syll, idx) => {
+                        const subject = Object.keys(syll)[0];
+                        const topics = syll[subject] as string[];
+                        return (
+                          <Box key={idx}>
+                            <Typography variant="h6" mb={1}>{subject.charAt(0).toUpperCase() + subject.slice(1)}</Typography>
+                            <Stack direction="row" flexWrap="wrap" gap={1}>
+                              {topics.map((topic, i) => (
+                                <Box key={i} px={2} py={1} bgcolor="#374151" color="#fff" borderRadius={2}>
+                                  {topic}
+                                </Box>
+                              ))}
+                            </Stack>
+                          </Box>
+                        );
+                      })}
+                    </Stack>
                   ) : (
                     <Typography>No syllabus assigned to this batch.</Typography>
                   )}
@@ -215,6 +270,58 @@ const BatchOverview = () => {
           Back to Batches
         </Button>
       </Box>
+
+      {/* Add to Batch Modal */}
+      <Dialog open={addModalOpen} onClose={() => setAddModalOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Add Student to Batch</DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} mt={1}>
+            <Autocomplete
+              options={allStudents}
+              getOptionLabel={(option) => option.name}
+              value={selectedStudent}
+              onChange={(_, value) => setSelectedStudent(value)}
+              renderInput={(params) => (
+                <TextField {...params} label="Select Student" fullWidth />
+              )}
+              isOptionEqualToValue={(option, value) => option.id === value.id}
+              filterSelectedOptions
+            />
+            <TextField
+              label="Amount"
+              type="number"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              fullWidth
+              required
+            />
+            <TextField
+              label="Joined At"
+              type="date"
+              value={joinedAt}
+              onChange={(e) => setJoinedAt(e.target.value)}
+              fullWidth
+              InputLabelProps={{ shrink: true }}
+              required
+            />
+            {addError && (
+              <Typography color="error">{addError}</Typography>
+            )}
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setAddModalOpen(false)} disabled={addLoading}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleAddToBatch}
+            variant="contained"
+            disabled={addLoading}
+          >
+            {addLoading ? 'Adding...' : 'Add'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </AnimatedPage>
   );
 };
