@@ -1,5 +1,6 @@
+import { ApiResponse, SuccessMessageResponse } from '../types/api';
+import { BatchRequest, BatchResponse, ClassScheduleRequest, ClassScheduleResponse, UpdateClassScheduleRequest } from '../types/batch';
 import api from './axios';
-import { ApiResponse, BatchRequest, BatchResponse, ClassScheduleRequest, ClassScheduleResponse, SuccessMessageResponse, UpdateClassScheduleRequest } from '../types';
 
 export const getAllBatches = async (): Promise<BatchResponse[]> => {
   const response = await api.get<ApiResponse<BatchResponse[]>>('/batches');

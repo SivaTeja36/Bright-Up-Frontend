@@ -1,5 +1,6 @@
+import { ApiResponse, SuccessMessageResponse } from '../types/api';
+import { SyllabusRequest, SyllabusResponse } from '../types/syllabus';
 import api from './axios';
-import { ApiResponse, SuccessMessageResponse, SyllabusRequest, SyllabusResponse } from '../types';
 
 export const getAllSyllabi = async (): Promise<SyllabusResponse[]> => {
   const response = await api.get<ApiResponse<SyllabusResponse[]>>('/syllabus');
