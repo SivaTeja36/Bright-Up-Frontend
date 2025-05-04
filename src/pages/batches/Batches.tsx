@@ -1,3 +1,5 @@
+// src/pages/Batches.tsx
+
 import { useState, useEffect } from 'react';
 import { Box, CircularProgress } from '@mui/material';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
@@ -6,7 +8,7 @@ import AnimatedPage from '../../components/AnimatedPage';
 import PageHeader from '../../components/PageHeader';
 import { useNavigate } from 'react-router-dom';
 import { getAllBatches } from '../../api/batch';
-import { BatchResponse } from '../../types';
+import { BatchResponse } from '../../types/batch';
 import AnimatedCard from '../../components/AnimatedCard';
 
 const Batches = () => {
@@ -23,40 +25,42 @@ const Batches = () => {
         setBatches(data);
       } catch (err) {
         setError('Failed to fetch batches');
-        console.error('Error fetching batches:', err);
       } finally {
         setLoading(false);
       }
     };
-
     fetchBatches();
   }, []);
 
   const columns: GridColDef[] = [
-    { field: 'id', headerName: 'ID', width: 90 },
-    { field: 'mentor_name', headerName: 'Mentor', width: 200 },
+    { field: 'id', headerName: 'ID', flex: 0.5, minWidth: 70 },
+    { field: 'mentor_name', headerName: 'Mentor', flex: 1, minWidth: 120 },
     {
       field: 'start_date',
       headerName: 'Start Date',
-      width: 150,
+      flex: 1,
+      minWidth: 120,
       valueFormatter: (params) => new Date(params.value).toLocaleDateString(),
     },
     {
       field: 'end_date',
       headerName: 'End Date',
-      width: 150,
+      flex: 1,
+      minWidth: 120,
       valueFormatter: (params) => new Date(params.value).toLocaleDateString(),
     },
     {
       field: 'created_at',
       headerName: 'Created At',
-      width: 200,
+      flex: 1.2,
+      minWidth: 150,
       valueFormatter: (params) => new Date(params.value).toLocaleString(),
     },
     {
       field: 'is_active',
       headerName: 'Status',
-      width: 130,
+      flex: 0.7,
+      minWidth: 100,
       valueFormatter: (params) => (params.value ? 'Active' : 'Inactive'),
     },
   ];
@@ -92,20 +96,25 @@ const Batches = () => {
             <DataGrid
               rows={batches}
               columns={columns}
+              getRowId={(row) => row.id}
               initialState={{
                 pagination: {
                   paginationModel: { page: 0, pageSize: 10 },
                 },
               }}
               pageSizeOptions={[5, 10, 20]}
-              checkboxSelection
               disableRowSelectionOnClick
+              onRowClick={(params) => navigate(`/batches/${params.row.id}`)}
+              sx={{
+                cursor: 'pointer',
+                '& .MuiDataGrid-row:hover': { backgroundColor: 'rgba(0,0,0,0.03)' },
+              }}
             />
           )}
         </Box>
       </AnimatedCard>
     </AnimatedPage>
   );
-}
+};
 
 export default Batches;
