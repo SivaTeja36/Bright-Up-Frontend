@@ -46,25 +46,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = async (credentials: LoginRequest) => {
     try {
       const response = await apiLogin(credentials);
-      const { access_token, ...userData } = response;
+      const { token, ...userData } = response;
       
       // Create user object
       const user: User = {
         id: userData.id,
         name: userData.name,
-        username: credentials.userName,
-        contact: userData.contact,
+        email: credentials.email,
+        phone_number: userData.contact,
         role: userData.role,
         created_at: new Date().toISOString(),
         is_active: true
       };
       
       // Save to localStorage
-      localStorage.setItem('token', access_token);
+      localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
       
       // Update state
-      setToken(access_token);
+      setToken(token);
       setUser(user);
       setIsAuthenticated(true);
     } catch (error) {

@@ -1,21 +1,17 @@
 export interface LoginRequest {
-  userName: string;
+  email: string;
   password: string;
 }
 
 export interface LoginResponse {
-  access_token: string;
-  name: string;
-  role: string;
-  id: number;
-  contact: string;
+  token: string;
 }
 
 export interface User {
   id: number;
   name: string;
-  username: string;
-  contact: string;
+  email: string;
+  phone_number: string;
   role: string;
   created_at: string;
   is_active: boolean;
@@ -23,10 +19,11 @@ export interface User {
 
 export interface UserCreationRequest {
   name: string;
-  username: string;
+  email: string;
+  gender: string;
   password: string;
   role: string;
-  contact: string;
+  phone_number: string;
 }
 
 export interface AuthContextType {

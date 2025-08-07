@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Box, CircularProgress } from '@mui/material';
+import { Box, CircularProgress, IconButton } from '@mui/material';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import { Users as UsersIcon } from 'lucide-react';
+import { Users as UsersIcon, Edit, Delete } from 'lucide-react';
 import AnimatedPage from '../../components/AnimatedPage';
 import PageHeader from '../../components/PageHeader';
 import { useNavigate } from 'react-router-dom';
 import { getAllUsers } from '../../api/auth';
-import { User } from '../../types';
+import { User } from '../../types/auth';
 import AnimatedCard from '../../components/AnimatedCard';
 
 const Users = () => {
@@ -33,11 +33,11 @@ const Users = () => {
   }, []);
 
   const columns: GridColDef[] = [
-    { field: 'id', headerName: 'ID', width: 90 },
-    { field: 'name', headerName: 'Name', width: 200 },
-    { field: 'username', headerName: 'Username', width: 200 },
-    { field: 'role', headerName: 'Role', width: 130 },
-    { field: 'contact', headerName: 'Contact', width: 150 },
+    { field: 'id', headerName: 'ID', width: 70 },
+    { field: 'name', headerName: 'Name', width: 120 },
+    { field: 'email', headerName: 'Email', flex: 1 },
+    { field: 'role', headerName: 'Role', width: 80 },
+    { field: 'phone_number', headerName: 'Phone Number', width: 150 },
     {
       field: 'created_at',
       headerName: 'Created At',
@@ -50,7 +50,32 @@ const Users = () => {
       field: 'is_active',
       headerName: 'Status',
       width: 130,
-      valueFormatter: (params) => (params.value ? 'Active' : 'Inactive'),
+      renderCell: (params) => (
+        <Box
+          sx={{
+            color: params.value ? 'green' : 'orange',
+            fontWeight: 'bold',
+          }}
+        >
+          {params.value ? 'Active' : 'Inactive'}
+        </Box>
+      ),
+    },
+    {
+      field: 'actions',
+      headerName: 'Actions',
+      width: 150,
+      sortable: false,
+      renderCell: (params) => (
+        <>
+          <IconButton onClick={() => console.log('Edit user', params.id)}>
+            <Edit size={20} />
+          </IconButton>
+          <IconButton onClick={() => console.log('Delete user', params.id)}>
+            <Delete size={20} />
+          </IconButton>
+        </>
+      ),
     },
   ];
 
