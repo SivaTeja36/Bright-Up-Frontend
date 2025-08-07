@@ -1,5 +1,6 @@
 import api from './axios';
-import { ApiResponse, StudentRequest, StudentResponse, MapStudentToBatchRequest, MappedBatchStudentResponse, UpdatedBatchStudentRequest, SuccessMessageResponse } from '../types/';
+import { ApiResponse, SuccessMessageResponse } from '../types/api'
+import { StudentRequest, StudentResponse, MapStudentToBatchRequest, MappedBatchStudentResponse, UpdatedBatchStudentRequest } from '../types/student';
 
 export const getAllStudents = async (): Promise<StudentResponse[]> => {
   const response = await api.get<ApiResponse<StudentResponse[]>>('/students');

@@ -26,8 +26,20 @@ export interface UserCreationRequest {
   phone_number: string;
 }
 
+export interface UserCreationResponse {
+  id: number;
+  message: string;
+}
+
+
+export interface UserInfoResponse {
+    id: number;
+    name: string;
+    email: string;
+    role: string;
+}
+
 export interface AuthContextType {
-  user: User | null;
   token: string | null;
   isAuthenticated: boolean;
   login: (credentials: LoginRequest) => Promise<void>;

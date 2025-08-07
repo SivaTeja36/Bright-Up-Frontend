@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   AppBar,
   Toolbar,
@@ -11,10 +11,12 @@ import {
   Badge,
   useTheme,
   useMediaQuery,
+  Tooltip,
 } from '@mui/material';
-import { Bell, Moon, Menu as MenuIcon, User } from 'lucide-react';
+import { Bell, Moon, Menu as MenuIcon, User, SquarePen } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useAuth } from '../../context/AuthContext';
+import { getUserInfo } from '../../api/auth';
+import { UserInfoResponse } from '../../types/auth';
 
 interface NavbarProps {
   onMenuClick: () => void;
@@ -23,9 +25,37 @@ interface NavbarProps {
 const Navbar = ({ onMenuClick }: NavbarProps) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const { user, logout } = useAuth();
+
+  const { logout } = (() => {
+    try {
+      return { logout: () => { console.log("Logout called") } };
+    } catch {
+      return { logout: () => console.log("Logout fallback") };
+    }
+  })();
+
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [notificationAnchorEl, setNotificationAnchorEl] = useState<null | HTMLElement>(null);
+  const [userInfo, setUserInfo] = useState<UserInfoResponse | null>(null);
+  const [loadingUserInfo, setLoadingUserInfo] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        setLoadingUserInfo(true);
+        setFetchError(null);
+        const data = await getUserInfo();
+        setUserInfo(data);
+      } catch (error) {
+        setFetchError('Failed to load user info.');
+        console.error('Error fetching user info:', error);
+      } finally {
+        setLoadingUserInfo(false);
+      }
+    };
+    fetchUser();
+  }, []);
 
   const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -48,6 +78,11 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
     logout();
   };
 
+  const handleEditProfile = () => {
+    console.log('Edit Profile clicked');
+    // You can route to a profile edit page or open a modal here
+  };
+
   return (
     <AppBar
       position="fixed"
@@ -63,12 +98,7 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
     >
       <Toolbar>
         {isMobile && (
-          <IconButton
-            color="inherit"
-            edge="start"
-            sx={{ mr: 2 }}
-            onClick={onMenuClick}
-          >
+          <IconButton color="inherit" edge="start" sx={{ mr: 2 }} onClick={onMenuClick}>
             <MenuIcon />
           </IconButton>
         )}
@@ -77,23 +107,14 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
 
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
-            <IconButton color="inherit" sx={{ ml: 1 }}>
-              <Moon size={20} />
-            </IconButton>
-          </motion.div>
-
-          <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
-            <IconButton
-              color="inherit"
-              sx={{ ml: 1 }}
-              onClick={handleNotificationMenuOpen}
-            >
+            <IconButton color="inherit" sx={{ ml: 1 }} onClick={handleNotificationMenuOpen}>
               <Badge badgeContent={3} color="error">
                 <Bell size={20} />
               </Badge>
             </IconButton>
           </motion.div>
 
+          {/* Avatar + Name + Role Section */}
           <Box
             sx={{
               ml: 2,
@@ -102,39 +123,79 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
               border: '1px solid rgba(255, 255, 255, 0.1)',
               borderRadius: 2,
               py: 0.5,
-              px: 1,
+              px: 1.2,
+              minWidth: 180,
             }}
           >
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <IconButton
-                onClick={handleProfileMenuOpen}
-                sx={{ p: 0, mr: 1 }}
-                size="small"
-              >
-                <Avatar
-                  sx={{
-                    width: 32,
-                    height: 32,
-                    bgcolor: 'primary.main',
-                  }}
-                >
-                  <User size={16} />
-                </Avatar>
+              <IconButton onClick={handleProfileMenuOpen} sx={{ p: 0, mr: 1 }} size="small">
+                <Box sx={{ position: 'relative' }}>
+                  <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.main' }}>
+                    <User size={16} />
+                  </Avatar>
+                  {/* Green dot */}
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      bottom: 0,
+                      right: 0,
+                      width: 8,
+                      height: 8,
+                      bgcolor: 'green',
+                      borderRadius: '50%',
+                      border: '2px solid white',
+                    }}
+                  />
+                </Box>
               </IconButton>
             </motion.div>
+
             {!isMobile && (
-              <Box>
-                <Typography variant="body2" fontWeight={500}>
-                  {user?.name || 'Admin User'}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  {user?.role || 'Admin'}
-                </Typography>
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  width: '100%',
+                  gap: 1,
+                }}
+              >
+                <Box sx={{ display: 'flex', flexDirection: 'column', minWidth: 0, flexGrow: 1 }}>
+                  <Typography
+                    variant="body2"
+                    fontWeight={600}
+                    sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+                  >
+                    {loadingUserInfo ? 'Loading...' : userInfo?.name || 'Sophia Johnson'}
+                  </Typography>
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textTransform: 'capitalize' }}
+                  >
+                    {loadingUserInfo ? '' : userInfo?.role || 'CEO'}
+                  </Typography>
+                </Box>
+
+                {/* Edit button */}
+                <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
+                <Tooltip title="Edit Profile">
+                  <IconButton
+                    size="small"
+                    sx={{ p: 0.5 }}
+                    onClick={handleEditProfile}
+                    color="inherit"
+                  >
+                    <SquarePen size={16} />
+                  </IconButton>
+                </Tooltip>
+              </motion.div>
               </Box>
             )}
           </Box>
         </Box>
 
+        {/* Profile Menu */}
         <Menu
           anchorEl={anchorEl}
           open={Boolean(anchorEl)}
@@ -144,7 +205,7 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
           PaperProps={{
             sx: {
               mt: 1.5,
-              backgroundImage: theme.palette.gradient.dark,
+              backgroundImage: theme.palette.gradient?.dark || undefined,
               border: '1px solid rgba(255, 255, 255, 0.1)',
             },
           }}
@@ -154,6 +215,7 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
           <MenuItem onClick={handleLogout}>Logout</MenuItem>
         </Menu>
 
+        {/* Notification Menu */}
         <Menu
           anchorEl={notificationAnchorEl}
           open={Boolean(notificationAnchorEl)}
@@ -165,7 +227,7 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
               mt: 1.5,
               width: 320,
               maxHeight: 400,
-              backgroundImage: theme.palette.gradient.dark,
+              backgroundImage: theme.palette.gradient?.dark || undefined,
               border: '1px solid rgba(255, 255, 255, 0.1)',
             },
           }}

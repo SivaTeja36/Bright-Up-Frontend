@@ -3,7 +3,6 @@ import {
   Box,
   TextField,
   Button,
-  Typography,
   MenuItem,
   FormControl,
   InputLabel,
@@ -11,7 +10,11 @@ import {
   SelectChangeEvent,
   Snackbar,
   Alert,
+  OutlinedInput,
+  InputAdornment,
+  IconButton,
 } from '@mui/material';
+import { FaRegEyeSlash, FaRegEye } from "react-icons/fa";
 import AnimatedPage from '../../components/AnimatedPage';
 import PageHeader from '../../components/PageHeader';
 import { createUser } from '../../api/auth'; 
@@ -112,6 +115,18 @@ const AddUser: React.FC = () => {
     }
   };
 
+  const [showPassword, setShowPassword] = React.useState(false);
+
+  const handleClickShowPassword = () => setShowPassword((show) => !show);
+
+  const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+  };
+
+  const handleMouseUpPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+  };
+
   // Snackbar close handler
   const handleSnackbarClose = (
     event?: React.SyntheticEvent | Event,
@@ -169,15 +184,29 @@ const AddUser: React.FC = () => {
             required
             fullWidth
           />
-          <TextField
+          <FormControl fullWidth variant="outlined">
+          <InputLabel htmlFor="outlined-adornment-password">Password</InputLabel>
+          <OutlinedInput
+            id="outlined-adornment-password"
+            type={showPassword ? 'text' : 'password'}
+            endAdornment={
+              <InputAdornment position="end">
+                <IconButton
+                  aria-label={
+                    showPassword ? 'hide the password' : 'display the password'
+                  }
+                  onClick={handleClickShowPassword}
+                  onMouseDown={handleMouseDownPassword}
+                  onMouseUp={handleMouseUpPassword}
+                  edge="end"
+                >
+                  {showPassword ? <FaRegEyeSlash /> : <FaRegEye />}
+                </IconButton>
+              </InputAdornment>
+            }
             label="Password"
-            name="password"
-            type="password"
-            value={form.password}
-            onChange={handleChange}
-            required
-            fullWidth
           />
+        </FormControl>
           <FormControl fullWidth required>
             <InputLabel id="gender-label">Gender</InputLabel>
             <Select
