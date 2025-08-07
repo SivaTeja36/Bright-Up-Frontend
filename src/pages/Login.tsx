@@ -19,7 +19,7 @@ import AnimatedPage from '../components/AnimatedPage';
 const Login = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
-  const [userName, setUserName] = useState('');
+  const [email, setUserName] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -28,7 +28,7 @@ const Login = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!userName || !password) {
+    if (!email || !password) {
       setError('Please enter both email and password.');
       return;
     }
@@ -37,7 +37,7 @@ const Login = () => {
       setLoading(true);
       setError('');
       
-      await login({ userName, password });
+      await login({ email, password });
       navigate('/dashboard');
     } catch (err: any) {
       setError(err?.response?.data?.message || 'Failed to login. Please check your credentials and try again.');
@@ -159,7 +159,7 @@ const Login = () => {
                 name="email"
                 autoComplete="email"
                 autoFocus
-                value={userName}
+                value={email}
                 onChange={(e) => setUserName(e.target.value)}
                 sx={{
                   mb: 3,

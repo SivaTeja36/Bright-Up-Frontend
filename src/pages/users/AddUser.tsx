@@ -3,17 +3,23 @@ import {
   Box,
   TextField,
   Button,
-  Typography,
   MenuItem,
   FormControl,
   InputLabel,
   Select,
   SelectChangeEvent,
+  Snackbar,
+  Alert,
+  OutlinedInput,
+  InputAdornment,
+  IconButton,
 } from '@mui/material';
+import { FaRegEyeSlash, FaRegEye } from "react-icons/fa";
 import AnimatedPage from '../../components/AnimatedPage';
 import PageHeader from '../../components/PageHeader';
-import { createUser } from '../../api/auth'; // Adjust this path as needed
-import { UserCreationRequest } from '../../types/auth'; // Adjust this path as needed
+import { createUser } from '../../api/auth'; 
+import { UserCreationRequest } from '../../types/auth'; 
+
 
 // Helper for user-friendly error messages
 function getFriendlyErrorMessage(error: any): string {
@@ -29,20 +35,27 @@ function getFriendlyErrorMessage(error: any): string {
   return "Failed to create user.";
 }
 
+
 const AddUser: React.FC = () => {
   const [form, setForm] = useState<UserCreationRequest>({
     name: '',
-    username: '',
+    email: '',
+    gender: '',
     password: '',
     role: '',
-    contact: '',
+    phone_number: '',
   });
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  // For TextField
+  // Snackbar state
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
+
+  // TextField change handler
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -53,7 +66,7 @@ const AddUser: React.FC = () => {
     }));
   };
 
-  // For Select
+  // Select change handler
   const handleSelectChange = (e: SelectChangeEvent<string>) => {
     const { name, value } = e.target;
     setForm((prev) => ({
@@ -62,6 +75,7 @@ const AddUser: React.FC = () => {
     }));
   };
 
+  // Submit handler
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -70,27 +84,56 @@ const AddUser: React.FC = () => {
 
     try {
       await createUser(form);
-      setSuccess('User created successfully!');
+      const successMsg = 'User created successfully!';
+      setSuccess(successMsg);
+      setSnackbarMessage(successMsg);
+      setSnackbarSeverity('success');
+      setSnackbarOpen(true);
       setForm({
         name: '',
-        username: '',
+        email: '',
+        gender: '',
         password: '',
         role: '',
-        contact: '',
+        phone_number: '',
       });
     } catch (err: any) {
-      let message = "Failed to create user";
-      if (err?.response?.data) {
-        message = getFriendlyErrorMessage(err.response.data);
-      } else if (err?.detail) {
-        message = getFriendlyErrorMessage(err);
-      } else if (err?.message) {
-        message = getFriendlyErrorMessage(err.message);
-      }
-      setError(message);
+        let message = "Failed to create user";
+        if (err?.response?.data) {
+          message = getFriendlyErrorMessage(err.response.data);
+        } else if (err?.detail) {
+          message = getFriendlyErrorMessage(err);
+        } else if (err?.message) {
+          message = getFriendlyErrorMessage(err.message);
+        }
+        setError(message);
+        setSnackbarMessage(message);
+        setSnackbarSeverity('error');
+        setSnackbarOpen(true);
     } finally {
       setLoading(false);
     }
+  };
+
+  const [showPassword, setShowPassword] = React.useState(false);
+
+  const handleClickShowPassword = () => setShowPassword((show) => !show);
+
+  const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+  };
+
+  const handleMouseUpPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+  };
+
+  // Snackbar close handler
+  const handleSnackbarClose = (
+    event?: React.SyntheticEvent | Event,
+    reason?: string
+  ) => {
+    if (reason === 'clickaway') return;
+    setSnackbarOpen(false);
   };
 
   return (
@@ -104,83 +147,129 @@ const AddUser: React.FC = () => {
           { label: 'Add User' }
         ]}
       />
+
       <Box
         component="form"
         onSubmit={handleSubmit}
         sx={{
           mt: 2,
-          maxWidth: 500,
+          maxWidth: 1100,
           mx: 'auto',
           display: 'flex',
           flexDirection: 'column',
-          gap: 2,
+          gap: 7,
         }}
       >
-        <TextField
-          label="Name"
-          name="name"
-          value={form.name}
-          onChange={handleChange}
-          fullWidth
-          required
-        />
-        <TextField
-          label="Email"
-          name="username"
-          value={form.username}
-          onChange={handleChange}
-          fullWidth
-          required
-        />
-        <TextField
-          label="Password"
-          name="password"
-          type="password"
-          value={form.password}
-          onChange={handleChange}
-          fullWidth
-          required
-        />
-        <FormControl fullWidth required>
-          <InputLabel id="role-label">Role</InputLabel>
-          <Select
-            labelId="role-label"
-            name="role"
-            value={form.role}
-            label="Role"
-            onChange={handleSelectChange}
-          >
-            <MenuItem value="Admin">Admin</MenuItem>
-            <MenuItem value="SuperAdmin">SuperAdmin</MenuItem>
-            <MenuItem value="Mentor">Mentor</MenuItem>
-            <MenuItem value="Student">Student</MenuItem>
-            {/* Add more roles as needed */}
-          </Select>
+        {/* Grid container for inputs */}
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: 3,
+          }}
+        >
+          <TextField
+            label="Name"
+            name="name"
+            value={form.name}
+            onChange={handleChange}
+            required
+            fullWidth
+          />
+          <TextField
+            label="Email"
+            name="email"
+            value={form.email}
+            onChange={handleChange}
+            required
+            fullWidth
+          />
+          <FormControl fullWidth variant="outlined">
+          <InputLabel htmlFor="outlined-adornment-password">Password</InputLabel>
+          <OutlinedInput
+            id="outlined-adornment-password"
+            type={showPassword ? 'text' : 'password'}
+            endAdornment={
+              <InputAdornment position="end">
+                <IconButton
+                  aria-label={
+                    showPassword ? 'hide the password' : 'display the password'
+                  }
+                  onClick={handleClickShowPassword}
+                  onMouseDown={handleMouseDownPassword}
+                  onMouseUp={handleMouseUpPassword}
+                  edge="end"
+                >
+                  {showPassword ? <FaRegEyeSlash /> : <FaRegEye />}
+                </IconButton>
+              </InputAdornment>
+            }
+            label="Password"
+          />
         </FormControl>
-        <TextField
-          label="Contact"
-          name="contact"
-          value={form.contact}
-          onChange={handleChange}
-          fullWidth
-          required
-        />
+          <FormControl fullWidth required>
+            <InputLabel id="gender-label">Gender</InputLabel>
+            <Select
+              labelId="gender-label"
+              name="gender"
+              value={form.gender}
+              label="Gender"
+              onChange={handleSelectChange}
+            >
+              <MenuItem value="MALE">Male</MenuItem>
+              <MenuItem value="FEMALE">Female</MenuItem>
+            </Select>
+          </FormControl>
+          <FormControl fullWidth required>
+            <InputLabel id="role-label">Role</InputLabel>
+            <Select
+              labelId="role-label"
+              name="role"
+              value={form.role}
+              label="Role"
+              onChange={handleSelectChange}
+            >
+              <MenuItem value="ADMIN">Admin</MenuItem>
+              <MenuItem value="MENTOR">Mentor</MenuItem>
+              <MenuItem value="STUDENT">Student</MenuItem>
+              <MenuItem value="GUEST">Guest</MenuItem>
+            </Select>
+          </FormControl>
+          <TextField
+            label="Phone Number"
+            name="phone_number"
+            value={form.phone_number}
+            onChange={handleChange}
+            required
+            fullWidth
+          />
+        </Box>
 
-        {error && (
-          <Typography color="error" align="center">
-            {error}
-          </Typography>
-        )}
-        {success && (
-          <Typography color="success.main" align="center">
-            {success}
-          </Typography>
-        )}
-
-        <Button type="submit" variant="contained" color="primary" disabled={loading}>
-          {loading ? 'Creating...' : 'Create User'}
-        </Button>
+        {/* Button container */}
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <Button type="submit" variant="contained" color="primary" disabled={loading}>
+            {loading ? 'Creating...' : 'Create'}
+          </Button>
+        </Box>
       </Box>
+
+      {/* Snackbar toaster notification */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={4000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        sx={{ mt: 8 }} 
+      >
+        <Alert
+          onClose={handleSnackbarClose}
+          severity={snackbarSeverity}
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </AnimatedPage>
   );
 };
