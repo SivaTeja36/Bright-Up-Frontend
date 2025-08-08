@@ -9,6 +9,7 @@ import {
   InputAdornment,
   IconButton,
   CircularProgress,
+  Snackbar,
   Alert,
 } from '@mui/material';
 import { motion } from 'framer-motion';
@@ -24,23 +25,100 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [showToast, setShowToast] = useState(false);
+
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email) {
+      setEmailError('Email is required');
+      return false;
+    }
+    if (!emailRegex.test(email)) {
+      setEmailError('Please enter a valid email address');
+      return false;
+    }
+    setEmailError('');
+    return true;
+  };
+
+  const validatePassword = (password: string): boolean => {
+    if (!password) {
+      setPasswordError('Password is required');
+      return false;
+    }
+    if (password.length < 8) {
+      setPasswordError('Password must be at least 8 characters long');
+      return false;
+    }
+    if (!password.match(/[A-Z]/)) {
+      setPasswordError('Password must contain at least one uppercase letter');
+      return false;
+    }
+    if (!password.match(/[a-z]/)) {
+      setPasswordError('Password must contain at least one lowercase letter');
+      return false;
+    }
+    if (!password.match(/\d/)) {
+      setPasswordError('Password must contain at least one digit');
+      return false;
+    }
+    if (!password.match(/[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]/)) {
+      setPasswordError('Password must contain at least one special character');
+      return false;
+    }
+    if (password.includes(' ')) {
+      setPasswordError('Password should not contain spaces');
+      return false;
+    }
+    setPasswordError('');
+    return true;
+  };
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setUserName(e.target.value);
+    if (emailError) setEmailError('');
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPassword(e.target.value);
+    if (passwordError) setPasswordError('');
+  };
+
+  const handleCloseToast = () => {
+    setShowToast(false);
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!email || !password) {
-      setError('Please enter both email and password.');
-      return;
-    }
-    
+    setError('');
+    setEmailError('');
+    setPasswordError('');
+
+    const isEmailValid = validateEmail(email);
+    const isPasswordValid = validatePassword(password);
+    if (!isEmailValid || !isPasswordValid) return;
+
     try {
       setLoading(true);
-      setError('');
-      
       await login({ email, password });
       navigate('/dashboard');
     } catch (err: any) {
-      setError(err?.response?.data?.message || 'Failed to login. Please check your credentials and try again.');
+      const errorMessage =
+        err?.response?.data?.detail ||
+        err?.response?.data?.message ||
+        'An error occurred during login';
+
+      if (errorMessage === 'Incorrect password' || errorMessage === 'INCORRECT_PASSWORD') {
+        setError('Incorrect password. Please check your password and try again.');
+      } else if (errorMessage === 'User not found' || errorMessage === 'USER_NOT_FOUND') {
+        setError('User not found. Please check your email address.');
+      } else {
+        setError(errorMessage);
+      }
+
+      setShowToast(true);
       console.error('Login error:', err);
     } finally {
       setLoading(false);
@@ -106,7 +184,7 @@ const Login = () => {
                 <BookOpen size={32} color="white" />
               </Box>
             </motion.div>
-            
+
             <Typography
               variant="h4"
               component={motion.h1}
@@ -118,7 +196,7 @@ const Login = () => {
             >
               Welcome to Brightup
             </Typography>
-            
+
             <Typography
               variant="body1"
               component={motion.p}
@@ -131,18 +209,6 @@ const Login = () => {
               Enter your credentials to access your account
             </Typography>
           </Box>
-
-          {error && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <Alert severity="error" sx={{ mb: 3, bgcolor: 'error.dark' }}>
-                {error}
-              </Alert>
-            </motion.div>
-          )}
 
           <Box component="form" onSubmit={handleLogin} noValidate>
             <motion.div
@@ -160,7 +226,9 @@ const Login = () => {
                 autoComplete="email"
                 autoFocus
                 value={email}
-                onChange={(e) => setUserName(e.target.value)}
+                onChange={handleEmailChange}
+                error={!!emailError}
+                helperText={emailError}
                 sx={{
                   mb: 3,
                   '& .MuiOutlinedInput-root': {
@@ -187,14 +255,13 @@ const Login = () => {
                 id="password"
                 autoComplete="current-password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={handlePasswordChange}
+                error={!!passwordError}
+                helperText={passwordError}
                 InputProps={{
                   endAdornment: (
                     <InputAdornment position="end">
-                      <IconButton
-                        onClick={() => setShowPassword(!showPassword)}
-                        edge="end"
-                      >
+                      <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
                         {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                       </IconButton>
                     </InputAdornment>
@@ -245,6 +312,51 @@ const Login = () => {
           </Box>
         </Card>
       </Box>
+
+      {/* Toast Notification moved OUTSIDE the Card */}
+      <Snackbar
+        open={showToast}
+        autoHideDuration={6000}
+        onClose={handleCloseToast}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        sx={{
+          position: 'fixed',
+          top: 16,
+          right: 16,
+          zIndex: 9999,
+        }}
+      >
+        <Alert
+          onClose={handleCloseToast}
+          severity="error"
+          sx={{
+            width: '350px',
+            backgroundColor: '#d32f2f',
+            color: 'white',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.25)',
+            borderRadius: '8px',
+            '& .MuiAlert-message': {
+              fontSize: '0.875rem',
+              fontWeight: 500,
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px',
+            },
+            '& .MuiAlert-icon': {
+              color: 'white',
+            },
+            '& .MuiAlert-action': {
+              '& .MuiIconButton-root': {
+                color: 'white',
+                '&:hover': {
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                },
+              },
+            },
+          }}
+        >
+          {error}
+        </Alert>
+      </Snackbar>
     </AnimatedPage>
   );
 };

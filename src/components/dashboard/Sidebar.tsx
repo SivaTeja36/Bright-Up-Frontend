@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
+import brightUpLogo from '../../assets/brightup logo.jpeg'
 
 interface SidebarItemProps {
   title: string;
@@ -241,8 +242,8 @@ const Sidebar = ({ open, onClose }: SidebarProps) => {
             animate={{ x: 0, opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.1 }}
           >
-            <Typography variant="h6" fontWeight="bold" color="primary.main">
-              Brightup
+            <Typography variant="h6" fontWeight="bold" color="text.secondary">
+              Bright Up
             </Typography>
           </motion.div>
         </Box>

@@ -17,9 +17,8 @@ import {
 import { FaRegEyeSlash, FaRegEye } from "react-icons/fa";
 import AnimatedPage from '../../components/AnimatedPage';
 import PageHeader from '../../components/PageHeader';
-import { createUser } from '../../api/auth'; 
-import { UserCreationRequest } from '../../types/auth'; 
-
+import { createUser } from '../../api/auth';
+import { UserCreationRequest } from '../../types/auth';
 
 // Helper for user-friendly error messages
 function getFriendlyErrorMessage(error: any): string {
@@ -34,7 +33,6 @@ function getFriendlyErrorMessage(error: any): string {
   }
   return "Failed to create user.";
 }
-
 
 const AddUser: React.FC = () => {
   const [form, setForm] = useState<UserCreationRequest>({
@@ -54,6 +52,9 @@ const AddUser: React.FC = () => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
+
+  // Password visibility
+  const [showPassword, setShowPassword] = useState(false);
 
   // TextField change handler
   const handleChange = (
@@ -75,6 +76,15 @@ const AddUser: React.FC = () => {
     }));
   };
 
+  // Password toggle
+  const handleClickShowPassword = () => setShowPassword((show) => !show);
+  const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+  };
+  const handleMouseUpPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+  };
+
   // Submit handler
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,12 +93,21 @@ const AddUser: React.FC = () => {
     setSuccess(null);
 
     try {
-      await createUser(form);
+      // Ensure role and gender are sent in UPPERCASE
+      const payload = {
+        ...form,
+        role: form.role.toUpperCase(),
+        gender: form.gender.toUpperCase(),
+      };
+
+      await createUser(payload);
       const successMsg = 'User created successfully!';
       setSuccess(successMsg);
       setSnackbarMessage(successMsg);
       setSnackbarSeverity('success');
       setSnackbarOpen(true);
+
+      // Reset form
       setForm({
         name: '',
         email: '',
@@ -98,33 +117,21 @@ const AddUser: React.FC = () => {
         phone_number: '',
       });
     } catch (err: any) {
-        let message = "Failed to create user";
-        if (err?.response?.data) {
-          message = getFriendlyErrorMessage(err.response.data);
-        } else if (err?.detail) {
-          message = getFriendlyErrorMessage(err);
-        } else if (err?.message) {
-          message = getFriendlyErrorMessage(err.message);
-        }
-        setError(message);
-        setSnackbarMessage(message);
-        setSnackbarSeverity('error');
-        setSnackbarOpen(true);
+      let message = "Failed to create user";
+      if (err?.response?.data) {
+        message = getFriendlyErrorMessage(err.response.data);
+      } else if (err?.detail) {
+        message = getFriendlyErrorMessage(err);
+      } else if (err?.message) {
+        message = getFriendlyErrorMessage(err.message);
+      }
+      setError(message);
+      setSnackbarMessage(message);
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
     } finally {
       setLoading(false);
     }
-  };
-
-  const [showPassword, setShowPassword] = React.useState(false);
-
-  const handleClickShowPassword = () => setShowPassword((show) => !show);
-
-  const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-  };
-
-  const handleMouseUpPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
   };
 
   // Snackbar close handler
@@ -184,29 +191,30 @@ const AddUser: React.FC = () => {
             required
             fullWidth
           />
-          <FormControl fullWidth variant="outlined">
-          <InputLabel htmlFor="outlined-adornment-password">Password</InputLabel>
-          <OutlinedInput
-            id="outlined-adornment-password"
-            type={showPassword ? 'text' : 'password'}
-            endAdornment={
-              <InputAdornment position="end">
-                <IconButton
-                  aria-label={
-                    showPassword ? 'hide the password' : 'display the password'
-                  }
-                  onClick={handleClickShowPassword}
-                  onMouseDown={handleMouseDownPassword}
-                  onMouseUp={handleMouseUpPassword}
-                  edge="end"
-                >
-                  {showPassword ? <FaRegEyeSlash /> : <FaRegEye />}
-                </IconButton>
-              </InputAdornment>
-            }
-            label="Password"
-          />
-        </FormControl>
+          <FormControl fullWidth variant="outlined" required>
+            <InputLabel htmlFor="outlined-adornment-password">Password</InputLabel>
+            <OutlinedInput
+              id="outlined-adornment-password"
+              name="password"
+              type={showPassword ? 'text' : 'password'}
+              value={form.password}
+              onChange={handleChange}
+              endAdornment={
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label={showPassword ? 'hide the password' : 'display the password'}
+                    onClick={handleClickShowPassword}
+                    onMouseDown={handleMouseDownPassword}
+                    onMouseUp={handleMouseUpPassword}
+                    edge="end"
+                  >
+                    {showPassword ? <FaRegEyeSlash /> : <FaRegEye />}
+                  </IconButton>
+                </InputAdornment>
+              }
+              label="Password"
+            />
+          </FormControl>
           <FormControl fullWidth required>
             <InputLabel id="gender-label">Gender</InputLabel>
             <Select
@@ -259,7 +267,7 @@ const AddUser: React.FC = () => {
         autoHideDuration={4000}
         onClose={handleSnackbarClose}
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-        sx={{ mt: 8 }} 
+        sx={{ mt: 8 }}
       >
         <Alert
           onClose={handleSnackbarClose}
