@@ -7,7 +7,7 @@ export interface LoginResponse {
   token: string;
 }
 
-export interface User {
+export interface UserDetails {
   id: number;
   name: string;
   email: string;
@@ -43,6 +43,9 @@ export interface UserUpdateRequest {
   is_active?: boolean;
 }
 
+export interface UserPasswordUpdateRequest {
+  password: string
+}
 
 export interface UserInfoResponse {
     id: number;

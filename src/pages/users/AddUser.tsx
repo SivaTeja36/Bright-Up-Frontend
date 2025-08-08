@@ -186,6 +186,7 @@ const AddUser: React.FC = () => {
           <TextField
             label="Email"
             name="email"
+            autoComplete='new-password'
             value={form.email}
             onChange={handleChange}
             required
@@ -199,6 +200,7 @@ const AddUser: React.FC = () => {
               type={showPassword ? 'text' : 'password'}
               value={form.password}
               onChange={handleChange}
+              autoComplete='new-password'
               endAdornment={
                 <InputAdornment position="end">
                   <IconButton

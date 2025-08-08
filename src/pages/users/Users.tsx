@@ -11,13 +11,13 @@ import AnimatedPage from '../../components/AnimatedPage';
 import PageHeader from '../../components/PageHeader';
 import { useNavigate } from 'react-router-dom';
 import { getAllUsers, updateUser } from '../../api/auth';
-import { User, UserUpdateRequest } from '../../types/auth';
+import { UserDetails, UserUpdateRequest } from '../../types/auth';
 import AnimatedCard from '../../components/AnimatedCard';
 
 const Users = () => {
   const navigate = useNavigate();
 
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<UserDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [updatingUserId, setUpdatingUserId] = useState<number | null>(null);
@@ -39,7 +39,7 @@ const Users = () => {
     fetchUsers();
   }, []);
 
-  const handleToggleActive = async (user: User) => {
+  const handleToggleActive = async (user: UserDetails) => {
     try {
       setUpdatingUserId(user.id);
 
@@ -130,7 +130,7 @@ const Users = () => {
       filterable: false,
       disableExport: true,
       renderCell: (params) => {
-        const user = params.row as User;
+        const user = params.row as UserDetails;
         const isActive = user.is_active;
         const loading = updatingUserId === user.id;
 
@@ -167,7 +167,7 @@ const Users = () => {
       filterable: false,
       disableExport: true,
       renderCell: (params) => {
-        const user = params.row as User;
+        const user = params.row as UserDetails;
         return (
           <IconButton
             size="small"

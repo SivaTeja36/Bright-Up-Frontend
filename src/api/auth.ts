@@ -1,6 +1,15 @@
 import api from './axios';
 import { ApiResponse } from '../types/api'
-import { LoginRequest, LoginResponse, User, UserCreationRequest, UserCreationResponse, UserInfoResponse, UserUpdateRequest } from '../types/auth';
+import { 
+  LoginRequest, 
+  LoginResponse, 
+  User, 
+  UserCreationRequest, 
+  UserCreationResponse, 
+  UserInfoResponse, 
+  UserUpdateRequest, 
+  UserPasswordUpdateRequest 
+} from '../types/auth';
 
 export const login = async (credentials: LoginRequest): Promise<LoginResponse> => {
   const response = await api.post<ApiResponse<LoginResponse>>('/login', credentials);
@@ -30,6 +39,11 @@ export const updateUser = async (
     `/users/data/${userId}`,
     userData
   );
+  return response.data.data;
+};
+
+export const updateUserPassword = async (userData: UserPasswordUpdateRequest): Promise<UserCreationResponse> => {
+  const response = await api.put<ApiResponse<UserCreationResponse>>('/users/password', userData);
   return response.data.data;
 };
 
