@@ -11,9 +11,13 @@ export interface User {
   id: number;
   name: string;
   email: string;
+  gender: string;
   phone_number: string;
   role: string;
   created_at: string;
+  created_by: string;
+  updated_at: string,
+  updated_by: string;
   is_active: boolean;
 }
 
@@ -29,6 +33,14 @@ export interface UserCreationRequest {
 export interface UserCreationResponse {
   id: number;
   message: string;
+}
+
+export interface UserUpdateRequest {
+  name: string;
+  gender: string;
+  role: string;
+  phone_number: string;
+  is_active?: boolean;
 }
 
 

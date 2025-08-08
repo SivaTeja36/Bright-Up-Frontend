@@ -6,6 +6,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Users from './pages/users/Users';
 import AddUser from './pages/users/AddUser';
+import UpdateUser from './pages/users/UpdateUser'; // <-- Import UpdateUser here
 import Syllabus from './pages/syllabus/Syllabus';
 import CreateSyllabus from './pages/syllabus/CreateSyllabus';
 import Batches from './pages/batches/Batches';
@@ -34,10 +35,11 @@ function App() {
             { path: '/dashboard', element: <Dashboard /> },
             { path: '/users', element: <Users /> },
             { path: '/users/add', element: <AddUser /> },
+            { path: '/users/update/:id', element: <UpdateUser /> }, 
             { path: '/syllabus', element: <Syllabus /> },
             { path: '/syllabus/create', element: <CreateSyllabus /> },
             { path: '/batches', element: <Batches /> },
-            { path: '/batches/:batchId', element: <BatchOverview /> }, // <-- THIS LINE CHANGED
+            { path: '/batches/:batchId', element: <BatchOverview /> },
             { path: '/batches/create', element: <CreateBatch /> },
             { path: '/batches/schedule', element: <ClassSchedule /> },
             { path: '/students', element: <Students /> },
