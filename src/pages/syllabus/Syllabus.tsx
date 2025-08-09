@@ -25,10 +25,9 @@ const Syllabus = () => {
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
   const [selectedSyllabusName, setSelectedSyllabusName] = useState<string>('');
 
-  // Snackbar
+  // Snackbar (only for errors)
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
-  const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
 
   const fetchSyllabi = async () => {
     try {
@@ -59,17 +58,26 @@ const Syllabus = () => {
     setSelectedSyllabusName('');
   };
 
+  const formatErrorMessage = (msg: string) => {
+    return msg
+      .replace(/_/g, ' ') // replace underscores with spaces
+      .toLowerCase() // make all lowercase
+      .replace(/^\w/, c => c.toUpperCase()); // capitalize first letter
+  };
+
   const handleDelete = async (id: number) => {
-    if (!window.confirm('Are you sure you want to delete this syllabus?')) return;
     try {
       await deleteSyllabus(id);
-      setSnackbarMessage('Syllabus deleted successfully');
-      setSnackbarSeverity('success');
-      setSnackbarOpen(true);
       fetchSyllabi();
     } catch (err: any) {
-      setSnackbarMessage(err.message || 'Failed to delete syllabus');
-      setSnackbarSeverity('error');
+      let rawMessage =
+        err?.response?.data?.detail ||
+        err?.response?.data?.message ||
+        err?.message ||
+        'Failed to delete syllabus';
+
+      const formattedMessage = formatErrorMessage(rawMessage);
+      setSnackbarMessage(formattedMessage);
       setSnackbarOpen(true);
     }
   };
@@ -149,7 +157,6 @@ const Syllabus = () => {
       ),
     },
   ];
-
 
   return (
     <AnimatedPage>
@@ -237,7 +244,7 @@ const Syllabus = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Snackbar */}
+      {/* Error Snackbar */}
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={3000}
@@ -247,7 +254,7 @@ const Syllabus = () => {
       >
         <Alert
           onClose={() => setSnackbarOpen(false)}
-          severity={snackbarSeverity}
+          severity="error"
           variant="filled"
           sx={{ width: '100%' }}
         >
