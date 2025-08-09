@@ -1,28 +1,33 @@
-import React, { useState } from 'react';
-import {
-  Box,
-  TextField,
-  Button,
-  Chip,
-  Stack,
-  Snackbar,
-  Alert
-} from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Box, TextField, Button, Chip, Stack, CircularProgress } from '@mui/material';
+import { useParams, useNavigate } from 'react-router-dom';
 import AnimatedPage from '../../components/AnimatedPage';
 import PageHeader from '../../components/PageHeader';
-import { createSyllabus } from '../../api/syllabus'; 
-import { SyllabusRequest } from '../../types/syllabus';
+import { getSyllabusById, updateSyllabus } from '../../api/syllabus';
+import { SyllabusRequest, SyllabusResponse } from '../../types/syllabus';
 
-const CreateSyllabus: React.FC = () => {
+const UpdateSyllabus: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+
   const [name, setName] = useState('');
   const [topics, setTopics] = useState<string[]>([]);
   const [topicInput, setTopicInput] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  // Snackbar state
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState('');
-  const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data: SyllabusResponse = await getSyllabusById(Number(id));
+        setName(data.name);
+        setTopics(data.topics);
+      } catch (err) {
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [id]);
 
   const handleAddTopic = () => {
     const trimmed = topicInput.trim();
@@ -32,55 +37,35 @@ const CreateSyllabus: React.FC = () => {
     }
   };
 
-  const handleDeleteTopic = (topicToDelete: string) => {
-    setTopics(topics.filter((topic) => topic !== topicToDelete));
+  const handleDeleteTopic = (topic: string) => {
+    setTopics(topics.filter(t => t !== topic));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-
     const payload: SyllabusRequest = { name, topics };
-
     try {
-      await createSyllabus(payload);
-      setSnackbarMessage('Syllabus created successfully!');
-      setSnackbarSeverity('success');
-      setSnackbarOpen(true);
-
-      // Reset form
-      setName('');
-      setTopics([]);
-      setTopicInput('');
+      await updateSyllabus(Number(id), payload);
+      setTimeout(() => navigate('/syllabus'), 1500);
     } catch (err: any) {
-      setSnackbarMessage(err.message || 'Failed to create syllabus');
-      setSnackbarSeverity('error');
-      setSnackbarOpen(true);
-    } finally {
-      setLoading(false);
     }
   };
 
-  const handleSnackbarClose = (
-    _event?: React.SyntheticEvent | Event,
-    reason?: string
-  ) => {
-    if (reason === 'clickaway') return;
-    setSnackbarOpen(false);
-  };
+  if (loading) {
+    return <Box display="flex" justifyContent="center" alignItems="center" height="80vh"><CircularProgress /></Box>;
+  }
 
   return (
     <AnimatedPage>
       <PageHeader
-        title="Create Syllabus"
-        subtitle="Create a new course syllabus"
+        title="Update Syllabus"
+        subtitle={`Editing syllabus ID: ${id}`}
         breadcrumbs={[
           { label: 'Dashboard', to: '/' },
           { label: 'Syllabus', to: '/syllabus' },
-          { label: 'Create Syllabus' }
+          { label: 'Update Syllabus' }
         ]}
       />
-
       <Box
         component="form"
         onSubmit={handleSubmit}
@@ -124,7 +109,6 @@ const CreateSyllabus: React.FC = () => {
           </Button>
         </Stack>
 
-        {/* Wrapping chips */}
         <Box display="flex" flexWrap="wrap" gap={1}>
           {topics.map((topic) => (
             <Chip
@@ -137,35 +121,12 @@ const CreateSyllabus: React.FC = () => {
           ))}
         </Box>
 
-        <Button
-          type="submit"
-          variant="contained"
-          color="primary"
-          disabled={loading}
-        >
-          {loading ? 'Creating...' : 'Create Syllabus'}
+        <Button type="submit" variant="contained" color="primary">
+          Update Syllabus
         </Button>
       </Box>
-
-      {/* Snackbar toaster notification */}
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={4000}
-        onClose={handleSnackbarClose}
-        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-        sx={{ mt: 8 }}
-      >
-        <Alert
-          onClose={handleSnackbarClose}
-          severity={snackbarSeverity}
-          variant="filled"
-          sx={{ width: '100%' }}
-        >
-          {snackbarMessage}
-        </Alert>
-      </Snackbar>
     </AnimatedPage>
   );
 };
 
-export default CreateSyllabus;
+export default UpdateSyllabus;

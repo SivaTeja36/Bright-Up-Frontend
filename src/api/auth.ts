@@ -3,7 +3,7 @@ import { ApiResponse } from '../types/api'
 import { 
   LoginRequest, 
   LoginResponse, 
-  User, 
+  UserDetails, 
   UserCreationRequest, 
   UserCreationResponse, 
   UserInfoResponse, 
@@ -16,13 +16,13 @@ export const login = async (credentials: LoginRequest): Promise<LoginResponse> =
   return response.data.data;
 };
 
-export const getAllUsers = async (): Promise<User[]> => {
-  const response = await api.get<ApiResponse<User[]>>('/users');
+export const getAllUsers = async (): Promise<UserDetails[]> => {
+  const response = await api.get<ApiResponse<UserDetails[]>>('/users');
   return response.data.data;
 };
 
-export const getUserById = async (userId: number): Promise<User> => {
-  const response = await api.get<ApiResponse<User>>(`/users/data/${userId}`);
+export const getUserById = async (userId: number): Promise<UserDetails> => {
+  const response = await api.get<ApiResponse<UserDetails>>(`/users/data/${userId}`);
   return response.data.data;
 };
 

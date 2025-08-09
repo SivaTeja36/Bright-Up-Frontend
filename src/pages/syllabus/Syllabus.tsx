@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Box, CircularProgress, Chip, Stack, Tooltip, Dialog, DialogTitle, DialogContent, Typography, IconButton
+  Box, CircularProgress, Chip, Stack, Dialog, DialogTitle,
+  DialogContent, Typography, IconButton, Tooltip, Snackbar, Alert
 } from '@mui/material';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { BookOpen, X } from 'lucide-react';
 import AnimatedPage from '../../components/AnimatedPage';
 import PageHeader from '../../components/PageHeader';
 import { useNavigate } from 'react-router-dom';
-import { getAllSyllabi } from '../../api/syllabus';
+import { getAllSyllabi, deleteSyllabus } from '../../api/syllabus';
 import { SyllabusResponse } from '../../types/syllabus';
 import AnimatedCard from '../../components/AnimatedCard';
+import { TbEdit } from "react-icons/tb";
+import { MdDeleteOutline } from "react-icons/md";
 
 const Syllabus = () => {
   const navigate = useNavigate();
@@ -22,20 +25,25 @@ const Syllabus = () => {
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
   const [selectedSyllabusName, setSelectedSyllabusName] = useState<string>('');
 
-  useEffect(() => {
-    const fetchSyllabi = async () => {
-      try {
-        setLoading(true);
-        const data = await getAllSyllabi();
-        setSyllabi(data);
-      } catch (err) {
-        setError('Failed to fetch syllabi');
-        console.error('Error fetching syllabi:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
+  // Snackbar
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
 
+  const fetchSyllabi = async () => {
+    try {
+      setLoading(true);
+      const data = await getAllSyllabi();
+      setSyllabi(data);
+    } catch (err) {
+      setError('Failed to fetch syllabi');
+      console.error('Error fetching syllabi:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchSyllabi();
   }, []);
 
@@ -51,13 +59,40 @@ const Syllabus = () => {
     setSelectedSyllabusName('');
   };
 
+  const handleDelete = async (id: number) => {
+    if (!window.confirm('Are you sure you want to delete this syllabus?')) return;
+    try {
+      await deleteSyllabus(id);
+      setSnackbarMessage('Syllabus deleted successfully');
+      setSnackbarSeverity('success');
+      setSnackbarOpen(true);
+      fetchSyllabi();
+    } catch (err: any) {
+      setSnackbarMessage(err.message || 'Failed to delete syllabus');
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
+    }
+  };
+
   const columns: GridColDef[] = [
-    { field: 'id', headerName: 'ID', width: 90 },
-    { field: 'name', headerName: 'Name', width: 200 },
+    { 
+      field: 'id', 
+      headerName: 'ID', 
+      width: 100,
+      headerAlign: 'left',
+      align: 'left',
+      renderHeader: () => (
+        <Box sx={{ paddingLeft: '16px' }}>ID</Box>
+      ),
+      renderCell: (params) => (
+        <Box sx={{ paddingLeft: '16px' }}>{params.value}</Box>
+      ),
+    },
+    { field: 'name', headerName: 'Name', flex: 1 },
     {
       field: 'topics',
       headerName: 'Topics',
-      width: 150,
+      flex: 1,
       renderCell: (params) => {
         const topics: string[] = params.value;
         const name: string = params.row.name;
@@ -77,16 +112,44 @@ const Syllabus = () => {
     {
       field: 'created_at',
       headerName: 'Created At',
-      width: 200,
+      flex: 1.5,
       valueFormatter: (params) => new Date(params.value).toLocaleString(),
     },
     {
       field: 'updated_at',
       headerName: 'Updated At',
-      width: 200,
+      flex: 1.5,
       valueFormatter: (params) => new Date(params.value).toLocaleString(),
     },
+    {
+      field: 'actions',
+      headerName: 'Actions',
+      flex: 1,
+      sortable: false,
+      filterable: false,
+      renderCell: (params) => (
+        <Stack direction="row" spacing={1}>
+          <Tooltip title="Edit">
+            <IconButton
+              onClick={() => navigate(`/syllabus/update/${params.row.id}`)}
+              sx={{ color: '#fff' }} 
+            >
+              <TbEdit size={18} />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Delete">
+            <IconButton
+              onClick={() => handleDelete(params.row.id)}
+              sx={{ color: '#fff' }}
+            >
+              <MdDeleteOutline size={18} />
+            </IconButton>
+          </Tooltip>
+        </Stack>
+      ),
+    },
   ];
+
 
   return (
     <AnimatedPage>
@@ -126,8 +189,17 @@ const Syllabus = () => {
                 },
               }}
               pageSizeOptions={[5, 10, 20]}
-              checkboxSelection
               disableRowSelectionOnClick
+              sx={{
+                '& .MuiDataGrid-columnHeaders': {
+                  backgroundColor: '#102a43',
+                  color: '#e0e0e0',
+                  fontWeight: '600',
+                },
+                '& .MuiDataGrid-row': {
+                  borderBottom: '1px solid #e0e0e0',
+                },
+              }}
             />
           )}
         </Box>
@@ -164,6 +236,24 @@ const Syllabus = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Snackbar */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        sx={{ mt: 8 }}
+      >
+        <Alert
+          onClose={() => setSnackbarOpen(false)}
+          severity={snackbarSeverity}
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </AnimatedPage>
   );
 };

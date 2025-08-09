@@ -9,6 +9,7 @@ import AddUser from './pages/users/AddUser';
 import UpdateUser from './pages/users/UpdateUser'; // <-- Import UpdateUser here
 import Syllabus from './pages/syllabus/Syllabus';
 import CreateSyllabus from './pages/syllabus/CreateSyllabus';
+import UpdateSyllabus from './pages/syllabus/UpdateSyllabus'
 import Batches from './pages/batches/Batches';
 import BatchOverview from './pages/batches/BatchOverview';
 import CreateBatch from './pages/batches/CreateBatch';
@@ -38,6 +39,7 @@ function App() {
             { path: '/users/update/:id', element: <UpdateUser /> }, 
             { path: '/syllabus', element: <Syllabus /> },
             { path: '/syllabus/create', element: <CreateSyllabus /> },
+            { path: '/syllabus/update/:id', element: <UpdateSyllabus /> }, 
             { path: '/batches', element: <Batches /> },
             { path: '/batches/:batchId', element: <BatchOverview /> },
             { path: '/batches/create', element: <CreateBatch /> },
