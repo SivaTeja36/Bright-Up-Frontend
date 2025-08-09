@@ -25,9 +25,10 @@ const Syllabus = () => {
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
   const [selectedSyllabusName, setSelectedSyllabusName] = useState<string>('');
 
-  // Snackbar (only for errors)
+  // Snackbar
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('error');
 
   const fetchSyllabi = async () => {
     try {
@@ -60,14 +61,17 @@ const Syllabus = () => {
 
   const formatErrorMessage = (msg: string) => {
     return msg
-      .replace(/_/g, ' ') // replace underscores with spaces
-      .toLowerCase() // make all lowercase
-      .replace(/^\w/, c => c.toUpperCase()); // capitalize first letter
+      .replace(/_/g, ' ')
+      .toLowerCase()
+      .replace(/^\w/, c => c.toUpperCase());
   };
 
   const handleDelete = async (id: number) => {
     try {
       await deleteSyllabus(id);
+      setSnackbarMessage("Syllabus deleted successfully");
+      setSnackbarSeverity("success");
+      setSnackbarOpen(true);
       fetchSyllabi();
     } catch (err: any) {
       let rawMessage =
@@ -78,6 +82,7 @@ const Syllabus = () => {
 
       const formattedMessage = formatErrorMessage(rawMessage);
       setSnackbarMessage(formattedMessage);
+      setSnackbarSeverity("error");
       setSnackbarOpen(true);
     }
   };
@@ -244,7 +249,7 @@ const Syllabus = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Error Snackbar */}
+      {/* Snackbar (success or error) */}
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={3000}
@@ -254,7 +259,7 @@ const Syllabus = () => {
       >
         <Alert
           onClose={() => setSnackbarOpen(false)}
-          severity="error"
+          severity={snackbarSeverity}
           variant="filled"
           sx={{ width: '100%' }}
         >
