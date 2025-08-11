@@ -1,17 +1,18 @@
 export interface BatchRequest {
+  name: string;
   syllabus_ids?: number[];
   start_date: string;
   end_date: string;
-  mentor_name: string;
-  is_active?: boolean;
+  mentor_id: number;
 }
 
 export interface BatchResponse {
   id: number;
+  name: string;
   syllabus: any[];
   start_date: string;
   end_date: string;
-  mentor_name: string;
+  mentor: string;
   created_at: string;
   created_by: string;
   updated_at: string;

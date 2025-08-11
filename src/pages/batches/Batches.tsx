@@ -34,7 +34,8 @@ const Batches = () => {
 
   const columns: GridColDef[] = [
     { field: 'id', headerName: 'ID', flex: 0.5, minWidth: 70 },
-    { field: 'mentor_name', headerName: 'Mentor', flex: 1, minWidth: 120 },
+    { field: 'name', headerName: 'Batch Name', flex: 1, minWidth: 70 },
+    { field: 'mentor', headerName: 'Mentor', flex: 1, minWidth: 120 },
     {
       field: 'start_date',
       headerName: 'Start Date',
