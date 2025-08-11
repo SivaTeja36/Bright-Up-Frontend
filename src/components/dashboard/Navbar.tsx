@@ -21,7 +21,7 @@ import {
 import { Bell, Menu as MenuIcon, Eye, EyeOff } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { getUserInfo, getUserById, updateUserPassword } from '../../api/auth';
-import { UserInfoResponse, UserDetails, UserPasswordUpdateRequest } from '../../types/auth';
+import { UserInfoResponse, GetUserDetailsResponse, UserPasswordUpdateRequest } from '../../types/auth';
 
 interface NavbarProps {
   onMenuClick: () => void;
@@ -35,7 +35,7 @@ const EditProfileModal = ({
 }: {
   open: boolean;
   onClose: () => void;
-  user: UserDetails | null;
+  user: GetUserDetailsResponse | null;
   onChangePasswordClick: () => void;
 }) => {
   const theme = useTheme();
@@ -255,7 +255,7 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
 
   const [notificationAnchorEl, setNotificationAnchorEl] = useState<null | HTMLElement>(null);
   const [userInfo, setUserInfo] = useState<UserInfoResponse | null>(null);
-  const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
+  const [userDetails, setUserDetails] = useState<GetUserDetailsResponse | null>(null);
   const [loadingUserInfo, setLoadingUserInfo] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [editProfileOpen, setEditProfileOpen] = useState(false);

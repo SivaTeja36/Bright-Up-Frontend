@@ -11,13 +11,13 @@ import AnimatedPage from '../../components/AnimatedPage';
 import PageHeader from '../../components/PageHeader';
 import { useNavigate } from 'react-router-dom';
 import { getAllUsers, updateUser } from '../../api/auth';
-import { UserDetails, UserUpdateRequest } from '../../types/auth';
+import { GetUserDetailsResponse, UpdateUserRequest } from '../../types/auth';
 import AnimatedCard from '../../components/AnimatedCard';
 
 const Users = () => {
   const navigate = useNavigate();
 
-  const [users, setUsers] = useState<UserDetails[]>([]);
+  const [users, setUsers] = useState<GetUserDetailsResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [updatingUserId, setUpdatingUserId] = useState<number | null>(null);
@@ -39,16 +39,26 @@ const Users = () => {
     fetchUsers();
   }, []);
 
-  const handleToggleActive = async (user: UserDetails) => {
+  const handleToggleActive = async (user: GetUserDetailsResponse) => {
     try {
       setUpdatingUserId(user.id);
 
       // Prepare user data without is_active field as per requirement
-      const updateData: UserUpdateRequest = {
+      const updateData: UpdateUserRequest = {
         name: user.name,
         gender: user.gender || '',
         role: user.role,
         phone_number: user.phone_number,
+        education: {
+          degree: user.education.degree,
+          specialization: user.education.specialization,
+          start_year: user.education.start_year,
+          end_year: user.education.end_year,
+          current_year_of_study: user.education.current_year_of_study,
+          status: user.education.status,
+          city: user.education.city,
+          state: user.education.state,
+        },
       };
 
       // Call update API with toggled is_active
@@ -130,7 +140,7 @@ const Users = () => {
       filterable: false,
       disableExport: true,
       renderCell: (params) => {
-        const user = params.row as UserDetails;
+        const user = params.row as GetUserDetailsResponse;
         const isActive = user.is_active;
         const loading = updatingUserId === user.id;
 
@@ -167,7 +177,7 @@ const Users = () => {
       filterable: false,
       disableExport: true,
       renderCell: (params) => {
-        const user = params.row as UserDetails;
+        const user = params.row as GetUserDetailsResponse;
         return (
           <IconButton
             size="small"

@@ -6,6 +6,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Users from './pages/users/Users';
 import AddUser from './pages/users/AddUser';
+import UserDetails from './pages/users/UserDetails'
 import UpdateUser from './pages/users/UpdateUser'; // <-- Import UpdateUser here
 import Syllabus from './pages/syllabus/Syllabus';
 import CreateSyllabus from './pages/syllabus/CreateSyllabus';
@@ -36,6 +37,7 @@ function App() {
             { path: '/dashboard', element: <Dashboard /> },
             { path: '/users', element: <Users /> },
             { path: '/users/add', element: <AddUser /> },
+            { path: '/users/details/:id', element: <UserDetails /> },
             { path: '/users/update/:id', element: <UpdateUser /> }, 
             { path: '/syllabus', element: <Syllabus /> },
             { path: '/syllabus/create', element: <CreateSyllabus /> },

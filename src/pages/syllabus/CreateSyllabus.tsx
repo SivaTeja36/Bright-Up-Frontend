@@ -86,7 +86,7 @@ const CreateSyllabus: React.FC = () => {
         onSubmit={handleSubmit}
         sx={{
           mt: 2,
-          maxWidth: 500,
+          maxWidth: 550,
           mx: 'auto',
           display: 'flex',
           flexDirection: 'column',
