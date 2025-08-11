@@ -43,7 +43,6 @@ const Users = () => {
     try {
       setUpdatingUserId(user.id);
 
-      // Prepare user data without is_active field as per requirement
       const updateData: UpdateUserRequest = {
         name: user.name,
         gender: user.gender || '',
@@ -78,8 +77,8 @@ const Users = () => {
     }
   };
 
-  const handleNavigateUpdate = (userId: number) => {
-    navigate(`/users/update/${userId}`);
+  const handleNavigateDetails = (userId: number) => {
+    navigate(`/users/details/${userId}`);
   };
 
   const columns: GridColDef[] = [
@@ -181,8 +180,8 @@ const Users = () => {
         return (
           <IconButton
             size="small"
-            aria-label="Update User"
-            onClick={() => handleNavigateUpdate(user.id)}
+            aria-label="View User Details"
+            onClick={() => handleNavigateDetails(user.id)}
           >
             &gt;
           </IconButton>

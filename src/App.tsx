@@ -7,7 +7,7 @@ import Dashboard from './pages/Dashboard';
 import Users from './pages/users/Users';
 import AddUser from './pages/users/AddUser';
 import UserDetails from './pages/users/UserDetails'
-import UpdateUser from './pages/users/UpdateUser'; // <-- Import UpdateUser here
+import UpdateUser from './pages/users/UpdateUser';
 import Syllabus from './pages/syllabus/Syllabus';
 import CreateSyllabus from './pages/syllabus/CreateSyllabus';
 import UpdateSyllabus from './pages/syllabus/UpdateSyllabus'
