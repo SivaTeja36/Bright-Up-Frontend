@@ -24,7 +24,12 @@ import {
   Edit as EditIcon,
   VerifiedUser as VerifiedUserIcon,
   CheckCircle as CheckCircleIcon,
-  RadioButtonUnchecked as UncheckedIcon
+  RadioButtonUnchecked as UncheckedIcon,
+  SupervisedUserCircle as MentorIcon,
+  School as StudentIcon,
+  PersonOutline as GuestIcon,
+  Female as FemaleIcon,
+  Male as MaleIcon
 } from '@mui/icons-material';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getUserById } from '../../api/auth';
@@ -77,6 +82,63 @@ const UserDetails = () => {
         return 'Guest';
       default:
         return role || 'User';
+    }
+  };
+
+  const getRoleIcon = (role: string) => {
+    switch (role?.toLowerCase()) {
+      case 'admin':
+        return <AdminIcon />;
+      case 'mentor':
+        return <MentorIcon />;
+      case 'student':
+        return <StudentIcon />;
+      case 'guest':
+        return <GuestIcon />;
+      default:
+        return <PersonIcon />;
+    }
+  };
+
+  const getRoleColor = (role: string) => {
+    switch (role?.toLowerCase()) {
+      case 'admin':
+        return 'primary';
+      case 'mentor':
+        return 'secondary';
+      case 'student':
+        return 'info';
+      case 'guest':
+        return 'warning';
+      default:
+        return 'default';
+    }
+  };
+
+  const getGenderDisplay = (gender: string) => {
+    if (!gender) return 'Not Specified';
+    return gender.charAt(0).toUpperCase() + gender.slice(1).toLowerCase();
+  };
+
+  const getGenderIcon = (gender: string) => {
+    switch (gender?.toLowerCase()) {
+      case 'female':
+        return <FemaleIcon />;
+      case 'male':
+        return <MaleIcon />;
+      default:
+        return <PersonIcon />;
+    }
+  };
+
+  const getGenderColor = (gender: string) => {
+    switch (gender?.toLowerCase()) {
+      case 'female':
+        return 'secondary'; // Light pink
+      case 'male':
+        return 'primary'; // Light blue
+      default:
+        return 'default';
     }
   };
 
@@ -168,11 +230,27 @@ const UserDetails = () => {
 
               {/* User Stats */}
               <Stack direction="row" spacing={1} sx={{ mb: 3, flexWrap: 'wrap', gap: 1 }}>
-                <Chip label={user.gender || 'Not specified'} icon={<PersonIcon />} variant="outlined" size="medium" sx={{ borderRadius: 3 }} />
-                <Chip label={user.is_active ? 'Active' : 'Inactive'} color={user.is_active ? 'success' : 'error'} size="medium" sx={{ borderRadius: 3 }} />
-                {user.role?.toLowerCase() === 'admin' && (
-                  <Chip label="Admin" icon={<AdminIcon />} color="primary" size="medium" sx={{ borderRadius: 3 }} />
-                )}
+                <Chip 
+                  label={getGenderDisplay(user.gender)} 
+                  icon={getGenderIcon(user.gender)} 
+                  color={getGenderColor(user.gender)} 
+                  variant="outlined" 
+                  size="medium" 
+                  sx={{ borderRadius: 3 }} 
+                />
+                <Chip 
+                  label={user.is_active ? 'Active' : 'Inactive'} 
+                  color={user.is_active ? 'success' : 'error'} 
+                  size="medium" 
+                  sx={{ borderRadius: 3 }} 
+                />
+                <Chip 
+                  label={getRoleDisplayName(user.role)} 
+                  icon={getRoleIcon(user.role)} 
+                  color={getRoleColor(user.role)} 
+                  size="medium" 
+                  sx={{ borderRadius: 3 }} 
+                />
               </Stack>
               
               <Divider sx={{ my: 3.9 }} />
