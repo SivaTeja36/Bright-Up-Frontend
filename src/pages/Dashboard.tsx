@@ -1,10 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Grid, Box, Card, CardContent, Typography, CardHeader, useTheme } from '@mui/material';
-import { Users, BookOpen, CalendarDays, GraduationCap, TrendingUp } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Grid, Box, CardContent, Typography, CardHeader, useTheme } from '@mui/material';
+import { BookOpen, CalendarDays, GraduationCap, TrendingUp } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, CartesianGrid, Legend } from 'recharts';
 import { getAllBatches } from '../api/batch';
-import { getAllStudents } from '../api/student';
 import { getAllSyllabi } from '../api/syllabus';
 import AnimatedPage from '../components/AnimatedPage';
 import AnimatedCard from '../components/AnimatedCard';
@@ -23,14 +21,12 @@ const Dashboard = () => {
       try {
         setLoading(true);
         
-        const [batches, students, syllabi] = await Promise.all([
+        const [batches, syllabi] = await Promise.all([
           getAllBatches(),
-          getAllStudents(),
           getAllSyllabi()
         ]);
         
         setBatchCount(batches.length);
-        setStudentCount(students.length);
         setSyllabusCount(syllabi.length);
       } catch (error) {
         console.error('Error fetching dashboard data:', error);

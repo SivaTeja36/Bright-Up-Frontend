@@ -195,15 +195,6 @@ const Sidebar = ({ open, onClose }: SidebarProps) => {
       ],
     },
     {
-      title: 'Students',
-      icon: <User size={20} />,
-      path: '/students',
-      subItems: [
-        { title: 'All Students', path: '/students' },
-        { title: 'Add Student', path: '/students/add' },
-      ],
-    },
-    {
       title: 'Reports',
       icon: <BarChart2 size={20} />,
       path: '/reports',

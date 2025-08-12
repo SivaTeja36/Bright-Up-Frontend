@@ -15,8 +15,6 @@ import Batches from './pages/batches/Batches';
 import BatchOverview from './pages/batches/BatchOverview';
 import CreateBatch from './pages/batches/CreateBatch';
 import ClassSchedule from './pages/batches/ClassSchedule';
-import Students from './pages/students/Students';
-import AddStudent from './pages/students/AddStudent';
 import Reports from './pages/Reports';
 
 function App() {
@@ -46,8 +44,6 @@ function App() {
             { path: '/batches/:batchId', element: <BatchOverview /> },
             { path: '/batches/create', element: <CreateBatch /> },
             { path: '/batches/schedule', element: <ClassSchedule /> },
-            { path: '/students', element: <Students /> },
-            { path: '/students/add', element: <AddStudent /> },
             { path: '/reports', element: <Reports /> },
           ],
         },
