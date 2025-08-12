@@ -126,13 +126,19 @@ const Syllabus = () => {
       field: 'created_at',
       headerName: 'Created At',
       flex: 1.5,
-      valueFormatter: (params) => new Date(params.value).toLocaleString(),
+      valueFormatter: (params) => {
+        const date = new Date(params.value);
+        return date.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
+    },
     },
     {
       field: 'updated_at',
       headerName: 'Updated At',
       flex: 1.5,
-      valueFormatter: (params) => new Date(params.value).toLocaleString(),
+      valueFormatter: (params) => {
+        const date = new Date(params.value);
+        return date.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
+    },
     },
     {
       field: 'actions',

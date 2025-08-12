@@ -128,8 +128,10 @@ const Users = () => {
       field: 'created_at',
       headerName: 'Created At',
       width: 140,
-      valueFormatter: (params) =>
-        new Date(params.value).toLocaleDateString(),
+      valueFormatter: (params) => {
+        const date = new Date(params.value);
+        return date.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
+    },
     },
     {
       field: 'enable_disable',

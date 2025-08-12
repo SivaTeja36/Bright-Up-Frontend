@@ -33,7 +33,19 @@ const Batches = () => {
   }, []);
 
   const columns: GridColDef[] = [
-    { field: 'id', headerName: 'ID', flex: 0.5, minWidth: 70 },
+        { 
+      field: 'id', 
+      headerName: 'ID', 
+      width: 100,
+      headerAlign: 'left',
+      align: 'left',
+      renderHeader: () => (
+        <Box sx={{ paddingLeft: '16px' }}>ID</Box>
+      ),
+      renderCell: (params) => (
+        <Box sx={{ paddingLeft: '16px' }}>{params.value}</Box>
+      ),
+    },
     { field: 'name', headerName: 'Batch Name', flex: 1, minWidth: 70 },
     { field: 'mentor', headerName: 'Mentor', flex: 1, minWidth: 120 },
     {
@@ -41,21 +53,41 @@ const Batches = () => {
       headerName: 'Start Date',
       flex: 1,
       minWidth: 120,
-      valueFormatter: (params) => new Date(params.value).toLocaleDateString(),
+      valueFormatter: (params) => {
+        const date = new Date(params.value);
+        return date.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
+    },
     },
     {
       field: 'end_date',
       headerName: 'End Date',
       flex: 1,
       minWidth: 120,
-      valueFormatter: (params) => new Date(params.value).toLocaleDateString(),
+      valueFormatter: (params) => {
+        const date = new Date(params.value);
+        return date.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
+    },
     },
     {
       field: 'created_at',
       headerName: 'Created At',
       flex: 1.2,
       minWidth: 150,
-      valueFormatter: (params) => new Date(params.value).toLocaleString(),
+      valueFormatter: (params) => {
+        if (!params.value) return '';
+        const date = new Date(params.value);
+
+        const month = date.toLocaleString('en-US', { month: 'short' });
+        const day = String(date.getDate()).padStart(2, '0');
+        const year = date.getFullYear();
+
+        let hours = date.getHours();
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const ampm = hours >= 12 ? 'pm' : 'am';
+        hours = hours % 12 || 12; // convert to 12-hour format
+
+        return `${month.charAt(0).toUpperCase() + month.slice(1)} ${day}, ${year} : ${hours}.${minutes} ${ampm}`;
+      },
     },
     {
       field: 'is_active',
@@ -107,8 +139,14 @@ const Batches = () => {
               disableRowSelectionOnClick
               onRowClick={(params) => navigate(`/batches/${params.row.id}`)}
               sx={{
-                cursor: 'pointer',
-                '& .MuiDataGrid-row:hover': { backgroundColor: 'rgba(0,0,0,0.03)' },
+                '& .MuiDataGrid-columnHeaders': {
+                  backgroundColor: '#102a43',
+                  color: '#e0e0e0',
+                  fontWeight: '600',
+                },
+                '& .MuiDataGrid-row': {
+                  borderBottom: '1px solid #e0e0e0',
+                },
               }}
             />
           )}

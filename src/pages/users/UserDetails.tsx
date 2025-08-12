@@ -385,7 +385,13 @@ const UserDetails = () => {
                       <Box>
                         <Typography variant="body2" color="text.secondary">Created At</Typography>
                         <Typography variant="body1" fontWeight={600}>
-                          {user.created_at ? new Date(user.created_at).toLocaleDateString() : 'Not available'}
+                           {user.created_at
+                          ? new Date(user.created_at).toLocaleDateString('en-US', { 
+                                month: 'short', 
+                                day: '2-digit', 
+                                year: 'numeric' 
+                              }) 
+                            : 'Not available'}
                         </Typography>
                         <Typography variant="body2" color="text.secondary" mt={4}>Created By</Typography>
                         <Typography variant="body1" fontWeight={600}>
@@ -398,9 +404,17 @@ const UserDetails = () => {
                     <Box display="flex" alignItems="flex-start" gap={2} mb={0.1}>
                       <CheckCircleIcon color="success" />
                       <Box>
-                        <Typography variant="body2" color="text.secondary">Last Updated</Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Last Updated
+                        </Typography>
                         <Typography variant="body1" fontWeight={600}>
-                          {user.updated_at ? new Date(user.updated_at).toLocaleDateString() : 'Not available'}
+                          {user.updated_at
+                            ? new Date(user.updated_at).toLocaleDateString('en-US', { 
+                                month: 'short', 
+                                day: '2-digit', 
+                                year: 'numeric' 
+                              })
+                            : 'Not available'}
                         </Typography>
                         <Typography variant="body2" color="text.secondary" mt={4}>Updated By</Typography>
                         <Typography variant="body1" fontWeight={600}>
