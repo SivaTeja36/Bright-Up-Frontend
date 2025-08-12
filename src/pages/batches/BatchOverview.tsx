@@ -17,9 +17,10 @@ import {
 } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
 import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
-import { Edit, Delete, Payment } from '@mui/icons-material';
+import { Payment } from '@mui/icons-material';
+import { TbEdit } from "react-icons/tb";
+import { MdDeleteOutline } from "react-icons/md";
 
-// Assuming you have these components in your project
 import AnimatedPage from '../../components/AnimatedPage';
 import PageHeader from '../../components/PageHeader';
 import AnimatedCard from '../../components/AnimatedCard';
@@ -51,9 +52,6 @@ import {
   GetBatchStudentPayment,
 } from '../../types/batch';
 
-/**
- * Dialog component for managing a student's payments.
- */
 interface StudentPaymentsDialogProps {
   open: boolean;
   onClose: () => void;
@@ -117,8 +115,8 @@ const StudentPaymentsDialog: React.FC<StudentPaymentsDialogProps> = ({
         mentor_share: 0,
         referral_share: 0,
       });
-      fetchPayments(); // Refresh the payments list
-      onPaymentAdded(); // Notify parent to refresh student data
+      fetchPayments();
+      onPaymentAdded();
     } catch (err: any) {
       setAddError(err?.response?.data?.detail || 'Failed to add payment.');
     } finally {
@@ -228,12 +226,10 @@ const BatchOverview: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState(0);
 
-  // Students Tab
   const [students, setStudents] = useState<GetMappedBatchStudentResponse[]>([]);
   const [studentsLoading, setStudentsLoading] = useState(false);
   const [deleteStudentModal, setDeleteStudentModal] = useState<number | null>(null);
 
-  // Student Edit/Add Modal
   const [studentModalOpen, setStudentModalOpen] = useState(false);
   const [isEditStudent, setIsEditStudent] = useState(false);
   const [currentStudent, setCurrentStudent] = useState<GetMappedBatchStudentResponse | null>(null);
@@ -246,16 +242,13 @@ const BatchOverview: React.FC = () => {
     joined_at: '',
   });
 
-  // Student Payments Modal
   const [paymentsModalOpen, setPaymentsModalOpen] = useState(false);
   const [currentStudentForPayments, setCurrentStudentForPayments] = useState<GetMappedBatchStudentResponse | null>(null);
 
-  // Class Schedule Tab
   const [schedule, setSchedule] = useState<ClassScheduleResponse[]>([]);
   const [scheduleLoading, setScheduleLoading] = useState(false);
   const [deleteScheduleModal, setDeleteScheduleModal] = useState<number | null>(null);
 
-  // Class Schedule Edit/Add Modal
   const [scheduleModalOpen, setScheduleModalOpen] = useState(false);
   const [isEditSchedule, setIsEditSchedule] = useState(false);
   const [currentSchedule, setCurrentSchedule] = useState<ClassScheduleResponse | null>(null);
@@ -265,12 +258,10 @@ const BatchOverview: React.FC = () => {
     end_time: '',
   });
 
-  // General loading/error states for modals
   const [modalLoading, setModalLoading] = useState(false);
   const [modalError, setModalError] = useState<string | null>(null);
 
-  // --- Data Fetching Functions ---
-
+  /** -------- Fetch Functions -------- **/
   const fetchBatchDetails = async () => {
     setLoading(true);
     try {
@@ -316,15 +307,11 @@ const BatchOverview: React.FC = () => {
   }, [batchId]);
 
   useEffect(() => {
-    if (tab === 0) {
-      fetchStudents();
-    } else if (tab === 1) {
-      fetchSchedules();
-    }
+    if (tab === 0) fetchStudents();
+    if (tab === 1) fetchSchedules();
   }, [tab, batchId]);
 
-  // --- Student Handlers ---
-
+  /** -------- Add/Edit Student -------- **/
   const handleOpenAddStudentModal = () => {
     setIsEditStudent(false);
     setCurrentStudent(null);
@@ -357,16 +344,24 @@ const BatchOverview: React.FC = () => {
       setModalError('Class fee and joined date are required.');
       return;
     }
-    if (!isEditStudent && studentData.student_id === 0) {
-        setModalError('Student ID is required for a new student.');
-        return;
+    if (!isEditStudent && (studentData as MapUserToBatchRequest).student_id === 0) {
+      setModalError('Student ID is required for a new student.');
+      return;
     }
 
     setModalLoading(true);
     setModalError(null);
     try {
       if (isEditStudent && currentStudent) {
-        await updateBatchStudent(Number(batchId), currentStudent.id, studentData as UpdatedBatchStudentRequest);
+        const { class_fee, mentor_fee, referral_by, referral_fee, joined_at } = studentData;
+        const updatePayload: UpdatedBatchStudentRequest = {
+          class_fee,
+          mentor_fee,
+          referral_by,
+          referral_fee,
+          joined_at,
+        };
+        await updateBatchStudent(Number(batchId), currentStudent.id, updatePayload);
       } else {
         await createBatchStudent(Number(batchId), studentData as MapUserToBatchRequest);
       }
@@ -379,6 +374,7 @@ const BatchOverview: React.FC = () => {
     }
   };
 
+  /** -------- Delete Student -------- **/
   const handleDeleteStudent = async () => {
     if (deleteStudentModal) {
       setModalLoading(true);
@@ -394,8 +390,7 @@ const BatchOverview: React.FC = () => {
     }
   };
 
-  // --- Class Schedule Handlers ---
-
+  /** -------- Schedule CRUD -------- **/
   const handleOpenAddScheduleModal = () => {
     setIsEditSchedule(false);
     setScheduleData({ day: Day.Monday, start_time: '', end_time: '' });
@@ -451,8 +446,7 @@ const BatchOverview: React.FC = () => {
     }
   };
 
-  // --- DataGrid Columns ---
-
+  /** -------- DataGrid Columns -------- **/
   const studentColumns: GridColDef[] = [
     { field: 'id', headerName: 'ID', width: 70 },
     { field: 'name', headerName: 'Name', flex: 1 },
@@ -474,28 +468,28 @@ const BatchOverview: React.FC = () => {
       renderCell: (params: GridRenderCellParams) => (
         <Stack direction="row" spacing={1}>
           <IconButton
-            color="info"
             size="small"
+            sx={{ color: '#fff'}}
             onClick={() => {
               setCurrentStudentForPayments(params.row as GetMappedBatchStudentResponse);
               setPaymentsModalOpen(true);
             }}
           >
-            <Payment />
+            <Payment sx={{ color: '#fff' }} />
           </IconButton>
           <IconButton
-            color="primary"
             size="small"
+            sx={{ color: '#fff' }}
             onClick={() => handleOpenEditStudentModal(params.row as GetMappedBatchStudentResponse)}
           >
-            <Edit />
+            <TbEdit size={20} color="#fff" />
           </IconButton>
           <IconButton
-            color="error"
             size="small"
+            sx={{ color: '#fff' }}
             onClick={() => setDeleteStudentModal(params.row.id)}
           >
-            <Delete />
+            <MdDeleteOutline size={20} color="#fff" />
           </IconButton>
         </Stack>
       ),
@@ -515,18 +509,18 @@ const BatchOverview: React.FC = () => {
       renderCell: (params: GridRenderCellParams) => (
         <Stack direction="row" spacing={1}>
           <IconButton
-            color="primary"
             size="small"
+            sx={{ color: '#fff' }}
             onClick={() => handleOpenEditScheduleModal(params.row as ClassScheduleResponse)}
           >
-            <Edit />
+            <TbEdit size={20} color="#fff" />
           </IconButton>
           <IconButton
-            color="error"
             size="small"
+            sx={{ color: '#fff' }}
             onClick={() => setDeleteScheduleModal(params.row.id)}
           >
-            <Delete />
+            <MdDeleteOutline size={20} color="#fff" />
           </IconButton>
         </Stack>
       ),
@@ -551,114 +545,113 @@ const BatchOverview: React.FC = () => {
           </Box>
         ) : batch ? (
           <Box>
-            {/* Batch Details */}
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} mb={3} alignItems="center">
               <Typography variant="h6">Mentor: {batch.mentor}</Typography>
               <Typography>Start: {new Date(batch.start_date).toLocaleDateString()}</Typography>
               <Typography>End: {new Date(batch.end_date).toLocaleDateString()}</Typography>
               <Typography>Status: {batch.is_active ? 'Active' : 'Inactive'}</Typography>
             </Stack>
-            {/* Tabs */}
+
             <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 2 }}>
               <Tab label="Students" />
               <Tab label="Class Schedule" />
               <Tab label="Syllabus" />
             </Tabs>
-            {/* Tab Content */}
-            <Box>
-              {tab === 0 && (
-                <Box>
-                  <Box display="flex" justifyContent="flex-end" mb={2}>
-                    <Button variant="contained" onClick={handleOpenAddStudentModal}>
-                      Add Student
-                    </Button>
-                  </Box>
-                  {studentsLoading ? (
-                    <CircularProgress />
-                  ) : (
-                    <DataGrid
-                      rows={students}
-                      columns={studentColumns}
-                      getRowId={(row) => row.id}
-                      autoHeight
-                      pageSizeOptions={[5, 10]}
-                    />
-                  )}
+
+            {tab === 0 && (
+              <Box>
+                <Box display="flex" justifyContent="flex-end" mb={2}>
+                  <Button variant="contained" onClick={handleOpenAddStudentModal}>
+                    Add Student
+                  </Button>
                 </Box>
-              )}
-              {tab === 1 && (
-                <Box>
-                  <Box display="flex" justifyContent="flex-end" mb={2}>
-                    <Button variant="contained" onClick={handleOpenAddScheduleModal}>
-                      Add Schedule
-                    </Button>
-                  </Box>
-                  {scheduleLoading ? (
-                    <CircularProgress />
-                  ) : (
-                    <DataGrid
-                      rows={schedule}
-                      columns={scheduleColumns}
-                      getRowId={(row) => row.id}
-                      autoHeight
-                      pageSizeOptions={[5, 10]}
-                    />
-                  )}
+                {studentsLoading ? (
+                  <CircularProgress />
+                ) : (
+                  <DataGrid
+                    rows={students}
+                    columns={studentColumns}
+                    getRowId={(row) => row.id}
+                    autoHeight
+                    pageSizeOptions={[5, 10]}
+                  />
+                )}
+              </Box>
+            )}
+
+            {tab === 1 && (
+              <Box>
+                <Box display="flex" justifyContent="flex-end" mb={2}>
+                  <Button variant="contained" onClick={handleOpenAddScheduleModal}>
+                    Add Schedule
+                  </Button>
                 </Box>
-              )}
-              {tab === 2 && (
-                <Box>
-                  {/* Syllabus Tab: Display syllabus from batch.syllabus */}
-                  {batch.syllabus && batch.syllabus.length > 0 ? (
-                    <Stack spacing={3}>
-                      {batch.syllabus.map((syll: any, idx: number) => {
-                        const subject = Object.keys(syll)[0];
-                        const topics = syll[subject] as string[];
-                        return (
-                          <Box key={idx}>
-                            <Typography variant="h6" mb={1}>{subject.charAt(0).toUpperCase() + subject.slice(1)}</Typography>
-                            <Stack direction="row" flexWrap="wrap" gap={1}>
-                              {topics.map((topic, i) => (
-                                <Box key={i} px={2} py={1} bgcolor="#374151" color="#fff" borderRadius={2}>
-                                  {topic}
-                                </Box>
-                              ))}
-                            </Stack>
-                          </Box>
-                        );
-                      })}
-                    </Stack>
-                  ) : (
-                    <Typography>No syllabus assigned to this batch.</Typography>
-                  )}
-                </Box>
-              )}
-            </Box>
+                {scheduleLoading ? (
+                  <CircularProgress />
+                ) : (
+                  <DataGrid
+                    rows={schedule}
+                    columns={scheduleColumns}
+                    getRowId={(row) => row.id}
+                    autoHeight
+                    pageSizeOptions={[5, 10]}
+                  />
+                )}
+              </Box>
+            )}
+
+            {tab === 2 && (
+              <Box>
+                {batch.syllabus && batch.syllabus.length > 0 ? (
+                  <Stack spacing={3}>
+                    {batch.syllabus.map((syll: any, idx: number) => {
+                      const subject = Object.keys(syll)[0];
+                      const topics = syll[subject] as string[];
+                      return (
+                        <Box key={idx}>
+                          <Typography variant="h6" mb={1}>{subject.charAt(0).toUpperCase() + subject.slice(1)}</Typography>
+                          <Stack direction="row" flexWrap="wrap" gap={1}>
+                            {topics.map((topic, i) => (
+                              <Box key={i} px={2} py={1} bgcolor="#374151" color="#fff" borderRadius={2}>
+                                {topic}
+                              </Box>
+                            ))}
+                          </Stack>
+                        </Box>
+                      );
+                    })}
+                  </Stack>
+                ) : (
+                  <Typography>No syllabus assigned to this batch.</Typography>
+                )}
+              </Box>
+            )}
           </Box>
         ) : (
           <Typography color="error">Batch not found.</Typography>
         )}
       </AnimatedCard>
+
       <Box mt={2}>
         <Button variant="outlined" color="secondary" onClick={() => navigate('/batches')}>
           Back to Batches
         </Button>
       </Box>
 
-      {/* Add/Edit Student Modal */}
+      {/* Student Modal */}
       <Dialog open={studentModalOpen} onClose={() => setStudentModalOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>{isEditStudent ? 'Edit Student Details' : 'Add Student to Batch'}</DialogTitle>
         <DialogContent>
           <Stack spacing={2} mt={1}>
             {!isEditStudent && (
-                <TextField
-                  label="Student ID"
-                  type="number"
-                  value={studentData.student_id === 0 ? '' : studentData.student_id}
-                  onChange={(e) => setStudentData({ ...studentData, student_id: Number(e.target.value) })}
-                  fullWidth
-                  required
-                />
+              <TextField
+                label="Student ID"
+                type="number"
+                value={(studentData as MapUserToBatchRequest).student_id === 0 ? '' : (studentData as MapUserToBatchRequest).student_id}
+                onChange={(e) => setStudentData({ ...studentData, student_id: Number(e.target.value) })}
+                fullWidth
+                required
+              />
             )}
             <TextField
               label="Class Fee"
@@ -698,26 +691,20 @@ const BatchOverview: React.FC = () => {
               InputLabelProps={{ shrink: true }}
               required
             />
-            {modalError && (
-              <Typography color="error">{modalError}</Typography>
-            )}
+            {modalError && <Typography color="error">{modalError}</Typography>}
           </Stack>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setStudentModalOpen(false)} disabled={modalLoading}>
             Cancel
           </Button>
-          <Button
-            onClick={handleSaveStudent}
-            variant="contained"
-            disabled={modalLoading || (!isEditStudent && studentData.student_id === 0)}
-          >
+          <Button onClick={handleSaveStudent} variant="contained" disabled={modalLoading || (!isEditStudent && (studentData as MapUserToBatchRequest).student_id === 0)}>
             {modalLoading ? 'Saving...' : 'Save'}
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Add/Edit Class Schedule Modal */}
+      {/* Schedule Modal */}
       <Dialog open={scheduleModalOpen} onClose={() => setScheduleModalOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>{isEditSchedule ? 'Edit Class Schedule' : 'Add Class Schedule'}</DialogTitle>
         <DialogContent>
@@ -754,26 +741,20 @@ const BatchOverview: React.FC = () => {
               InputLabelProps={{ shrink: true }}
               required
             />
-            {modalError && (
-              <Typography color="error">{modalError}</Typography>
-            )}
+            {modalError && <Typography color="error">{modalError}</Typography>}
           </Stack>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setScheduleModalOpen(false)} disabled={modalLoading}>
             Cancel
           </Button>
-          <Button
-            onClick={handleSaveSchedule}
-            variant="contained"
-            disabled={modalLoading}
-          >
+          <Button onClick={handleSaveSchedule} variant="contained" disabled={modalLoading}>
             {modalLoading ? 'Saving...' : 'Save'}
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Delete Confirmation Modals */}
+      {/* Delete Modals */}
       <Dialog open={deleteStudentModal !== null} onClose={() => setDeleteStudentModal(null)}>
         <DialogTitle>Confirm Deletion</DialogTitle>
         <DialogContent>
@@ -804,7 +785,6 @@ const BatchOverview: React.FC = () => {
         </DialogActions>
       </Dialog>
 
-      {/* Student Payments Modal */}
       {paymentsModalOpen && currentStudentForPayments && (
         <StudentPaymentsDialog
           open={paymentsModalOpen}
