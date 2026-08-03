@@ -3,6 +3,7 @@ import {
   Box,
   Chip,
   IconButton,
+  useTheme,
 } from '@mui/material';
 import { GridColDef } from '@mui/x-data-grid';
 import { RiDeleteBin6Line } from "react-icons/ri";
@@ -19,6 +20,8 @@ import AddUserDialog from '../../components/dialogs/AddUserDialog';
 import DataTable from '../../components/DataTable';
 
 const Users = () => {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -54,8 +57,8 @@ const Users = () => {
           label={params.value}
           size="small"
           sx={{
-            backgroundColor: '#DBEAFE',
-            color: '#1E40AF',
+            backgroundColor: isDark ? 'rgba(59, 130, 246, 0.18)' : '#DBEAFE',
+            color: isDark ? '#93C5FD' : '#1E40AF',
             fontWeight: 600,
             textTransform: 'capitalize',
           }}

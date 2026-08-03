@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Grid, Box, Card, CardContent, Typography, CardHeader, useTheme } from '@mui/material';
-import { Users, BookOpen, CalendarDays, GraduationCap, TrendingUp } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Grid, Box, CardContent, Typography, CardHeader, useTheme } from '@mui/material';
+import { BookOpen, CalendarDays, GraduationCap, TrendingUp } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, CartesianGrid, Legend } from 'recharts';
 import { getAllBatches } from '../api/batch';
 import { getAllStudents } from '../api/student';
@@ -10,6 +9,7 @@ import AnimatedPage from '../components/AnimatedPage';
 import AnimatedCard from '../components/AnimatedCard';
 import StatsCard from '../components/StatsCard';
 import PageHeader from '../components/PageHeader';
+import QuoteBanner from '../components/QuoteBanner';
 
 const Dashboard = () => {
   const theme = useTheme();
@@ -17,6 +17,17 @@ const Dashboard = () => {
   const [studentCount, setStudentCount] = useState(0);
   const [syllabusCount, setSyllabusCount] = useState(0);
   const [loading, setLoading] = useState(true);
+
+  const chartGridColor = theme.palette.divider;
+  const chartAxisColor = theme.palette.text.secondary;
+  const chartTooltipStyle = {
+    backgroundColor: theme.palette.background.paper,
+    borderColor: theme.palette.divider,
+    color: theme.palette.text.primary,
+    borderRadius: 8,
+    boxShadow: '0px 8px 24px rgba(15, 23, 42, 0.12)',
+  };
+  const chartLabelColor = theme.palette.text.primary;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -77,6 +88,8 @@ const Dashboard = () => {
         title="Dashboard" 
         subtitle="Welcome to Brightup Admin Portal"
       />
+
+      <QuoteBanner />
       
       <Grid container spacing={3}>
         {/* Stats Cards */}
@@ -105,7 +118,7 @@ const Dashboard = () => {
             title="Syllabus Available"
             value={loading ? '...' : syllabusCount}
             icon={<BookOpen size={24} />}
-            color="#8B5CF6"
+            color="#3B82F6"
             increase="+5 added recently"
           />
         </Grid>
@@ -128,17 +141,10 @@ const Dashboard = () => {
               <Box sx={{ height: { xs: 260, sm: 300 }, width: '100%' }}>
                 <ResponsiveContainer>
                   <BarChart data={monthlyEnrollmentData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
-                    <XAxis dataKey="name" stroke="#94A3B8" />
-                    <YAxis stroke="#94A3B8" />
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: 'rgba(255, 255, 255, 0.98)', 
-                        borderColor: '#E2E8F0',
-                        borderRadius: 8,
-                        boxShadow: '0px 8px 24px rgba(15, 23, 42, 0.12)'
-                      }} 
-                    />
+                    <CartesianGrid strokeDasharray="3 3" stroke={chartGridColor} />
+                    <XAxis dataKey="name" stroke={chartAxisColor} tick={{ fill: chartAxisColor }} />
+                    <YAxis stroke={chartAxisColor} tick={{ fill: chartAxisColor }} />
+                    <Tooltip contentStyle={chartTooltipStyle} />
                     <Bar dataKey="students" fill="url(#colorGradient)" radius={[4, 4, 0, 0]} />
                     <defs>
                       <linearGradient id="colorGradient" x1="0" y1="0" x2="0" y2="1">
@@ -170,20 +176,13 @@ const Dashboard = () => {
                       paddingAngle={5}
                       dataKey="value"
                       labelLine={false}
-                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                      label={{ fill: chartLabelColor, fontSize: 12, fontWeight: 600 }}
                     >
-                      {courseDistributionData.map((entry, index) => (
+                      {courseDistributionData.map((_, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: 'rgba(255, 255, 255, 0.98)', 
-                        borderColor: '#E2E8F0',
-                        borderRadius: 8,
-                        boxShadow: '0px 8px 24px rgba(15, 23, 42, 0.12)'
-                      }} 
-                    />
+                    <Tooltip contentStyle={chartTooltipStyle} />
                   </PieChart>
                 </ResponsiveContainer>
               </Box>
@@ -199,19 +198,14 @@ const Dashboard = () => {
               <Box sx={{ height: { xs: 260, sm: 300 }, width: '100%' }}>
                 <ResponsiveContainer>
                   <LineChart data={revenueData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
-                    <XAxis dataKey="name" stroke="#94A3B8" />
-                    <YAxis stroke="#94A3B8" />
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: 'rgba(255, 255, 255, 0.98)', 
-                        borderColor: '#E2E8F0',
-                        borderRadius: 8,
-                        boxShadow: '0px 8px 24px rgba(15, 23, 42, 0.12)'
-                      }} 
+                    <CartesianGrid strokeDasharray="3 3" stroke={chartGridColor} />
+                    <XAxis dataKey="name" stroke={chartAxisColor} tick={{ fill: chartAxisColor }} />
+                    <YAxis stroke={chartAxisColor} tick={{ fill: chartAxisColor }} />
+                    <Tooltip
+                      contentStyle={chartTooltipStyle}
                       formatter={(value) => [`₹${value}`, 'Revenue']}
                     />
-                    <Legend />
+                    <Legend wrapperStyle={{ color: chartLabelColor }} />
                     <Line
                       type="monotone"
                       dataKey="revenue"
@@ -244,8 +238,8 @@ const Dashboard = () => {
                     sx={{
                       p: 1.5,
                       borderRadius: 2,
-                      bgcolor: '#F8FAFC',
-                      border: '1px solid #E2E8F0',
+                      bgcolor: theme.palette.mode === 'dark' ? '#182238' : '#F8FAFC',
+                      border: `1px solid ${theme.palette.divider}`,
                     }}
                   >
                     <Typography variant="body2" fontWeight={500}>
@@ -278,8 +272,8 @@ const Dashboard = () => {
                     sx={{
                       p: 1.5,
                       borderRadius: 2,
-                      bgcolor: '#F8FAFC',
-                      border: '1px solid #E2E8F0',
+                      bgcolor: theme.palette.mode === 'dark' ? '#182238' : '#F8FAFC',
+                      border: `1px solid ${theme.palette.divider}`,
                     }}
                   >
                     <Typography variant="body2" fontWeight={500}>

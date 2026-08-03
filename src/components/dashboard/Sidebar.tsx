@@ -9,9 +9,9 @@ import {
   ListItemText,
   Typography,
   IconButton,
-  Divider,
   useTheme,
   useMediaQuery,
+  Avatar,
 } from '@mui/material';
 import {
   Home,
@@ -25,6 +25,8 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
+import { HEADER_HEIGHT } from '../../layouts/layoutConstants';
+import BrightupLogo from '../BrightupLogo';
 
 interface SidebarItemProps {
   title: string;
@@ -33,37 +35,55 @@ interface SidebarItemProps {
 }
 
 const SidebarItem = ({ title, icon, path }: SidebarItemProps) => {
+  const theme = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
   const isActive = location.pathname === path || location.pathname.startsWith(`${path}/`);
 
+  const activeGradient = `linear-gradient(90deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 55%, ${theme.palette.secondary.main} 100%)`;
+
   return (
-    <ListItem disablePadding>
-      <ListItemButton
-        onClick={() => navigate(path)}
-        sx={{
-          borderRadius: 2,
-          mb: 0.5,
-          pl: 2,
-          background: isActive ? 'rgba(37, 99, 235, 0.1)' : 'transparent',
-          '&:hover': {
-            background: isActive
-              ? 'rgba(37, 99, 235, 0.15)'
-              : 'rgba(37, 99, 235, 0.06)',
-          },
-        }}
+    <ListItem disablePadding sx={{ px: 1, mb: 0.5 }}>
+      <motion.div
+        style={{ width: '100%' }}
+        whileHover={{ x: 4 }}
+        transition={{ type: 'spring', stiffness: 400, damping: 22 }}
       >
-        <ListItemIcon sx={{ color: isActive ? 'primary.main' : 'text.secondary', minWidth: 40 }}>
-          {icon}
-        </ListItemIcon>
-        <ListItemText
-          primary={title}
-          primaryTypographyProps={{
-            fontWeight: isActive ? 600 : 400,
-            color: isActive ? 'primary.main' : 'text.primary',
+        <ListItemButton
+          onClick={() => navigate(path)}
+          sx={{
+            borderRadius: 3,
+            pl: 2,
+            py: 1.1,
+            background: isActive ? activeGradient : 'transparent',
+            boxShadow: isActive ? `0px 6px 18px rgba(37, 99, 235, ${theme.palette.mode === 'dark' ? 0.45 : 0.35})` : 'none',
+            '&:hover': {
+              background: isActive
+                ? activeGradient
+                : theme.palette.mode === 'dark'
+                  ? 'rgba(59, 130, 246, 0.16)'
+                  : 'rgba(37, 99, 235, 0.07)',
+            },
           }}
-        />
-      </ListItemButton>
+        >
+          <ListItemIcon
+            sx={{
+              color: isActive ? '#FFFFFF' : 'text.secondary',
+              minWidth: 40,
+              transition: 'color 0.2s ease',
+            }}
+          >
+            {icon}
+          </ListItemIcon>
+          <ListItemText
+            primary={title}
+            primaryTypographyProps={{
+              fontWeight: isActive ? 700 : 500,
+              color: isActive ? '#FFFFFF' : 'text.primary',
+            }}
+          />
+        </ListItemButton>
+      </motion.div>
     </ListItem>
   );
 };
@@ -77,6 +97,7 @@ const Sidebar = ({ open, onClose }: SidebarProps) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const { logout } = useAuth();
+  const isDark = theme.palette.mode === 'dark';
 
   const sidebarItems = [
     {
@@ -111,52 +132,99 @@ const Sidebar = ({ open, onClose }: SidebarProps) => {
     },
   ];
 
+  const brandGradient = theme.palette.gradient?.brand || `linear-gradient(120deg, #1D4ED8 0%, #2563EB 50%, #0EA5E9 100%)`;
+
   const drawerContent = (
-    <>
+    <Box
+      sx={{
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        backgroundColor: theme.palette.background.paper,
+      }}
+    >
+      {/* Brand header */}
       <Box
         sx={{
+          position: 'relative',
+          overflow: 'hidden',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'space-between',
-          p: 2,
+          height: HEADER_HEIGHT,
+          px: 2.5,
+          background: brandGradient,
+          borderBottom: `1px solid ${theme.palette.divider}`,
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.5 }}
-          >
-            <IconButton
-              sx={{
-                background: 'linear-gradient(135deg, #2563EB 0%, #0EA5E9 100%)',
-                boxShadow: '0px 4px 12px rgba(37, 99, 235, 0.35)',
-                color: 'white',
-                mr: 2,
-              }}
-              disableRipple
+        <Box
+          sx={{
+            position: 'absolute',
+            top: -50,
+            right: -40,
+            width: 140,
+            height: 140,
+            borderRadius: '50%',
+            background: 'rgba(255, 255, 255, 0.12)',
+          }}
+        />
+        <Box
+          sx={{
+            position: 'absolute',
+            bottom: -60,
+            left: '40%',
+            width: 120,
+            height: 120,
+            borderRadius: '50%',
+            background: 'rgba(255, 255, 255, 0.08)',
+          }}
+        />
+        <Box
+          sx={{
+            position: 'relative',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            width: '100%',
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', flex: 1, minWidth: 0 }}>
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.5 }}
+              style={{ width: '100%' }}
             >
-              <BookOpen size={24} />
+              <BrightupLogo
+                iconWidth={50}
+                textWidth={160}
+                gap={1.5}
+                color="white"
+              />
+            </motion.div>
+          </Box>
+          {isMobile && (
+            <IconButton onClick={onClose} edge="end" sx={{ color: '#FFFFFF' }}>
+              <Menu size={20} />
             </IconButton>
-          </motion.div>
-          <motion.div
-            initial={{ x: -20, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-          >
-            <Typography variant="h6" fontWeight="bold" color="primary.main">
-              Brightup
-            </Typography>
-          </motion.div>
+          )}
         </Box>
-        {isMobile && (
-          <IconButton onClick={onClose} edge="end">
-            <Menu size={20} />
-          </IconButton>
-        )}
       </Box>
-      <Divider sx={{ borderColor: '#E2E8F0' }} />
-      <Box sx={{ overflow: 'auto', px: 2, py: 2 }}>
+
+      {/* Navigation */}
+      <Box sx={{ overflow: 'auto', py: 2, flexGrow: 1 }}>
+        <Typography
+          variant="overline"
+          sx={{
+            display: 'block',
+            px: 3,
+            mb: 1,
+            color: 'text.secondary',
+            fontWeight: 700,
+            letterSpacing: '0.12em',
+          }}
+        >
+          Main Menu
+        </Typography>
         <List>
           {sidebarItems.map((item, index) => (
             <SidebarItem
@@ -168,29 +236,58 @@ const Sidebar = ({ open, onClose }: SidebarProps) => {
           ))}
         </List>
       </Box>
-      <Box sx={{ mt: 'auto', p: 2 }}>
-        <Divider sx={{ borderColor: '#E2E8F0', mb: 2 }} />
+
+      {/* Bottom section */}
+      <Box sx={{ p: 2 }}>
+        <Box
+          sx={{
+            p: 1.5,
+            borderRadius: 3,
+            background: isDark
+              ? 'rgba(59, 130, 246, 0.12)'
+              : 'rgba(37, 99, 235, 0.06)',
+            border: `1px solid rgba(37, 99, 235, ${isDark ? 0.3 : 0.15})`,
+            mb: 1.5,
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Avatar
+              sx={{
+                width: 36,
+                height: 36,
+                background: `linear-gradient(135deg, ${theme.palette.primary.dark}, ${theme.palette.secondary.main})`,
+              }}
+            >
+              <User size={18} />
+            </Avatar>
+            <Box sx={{ minWidth: 0, flexGrow: 1 }}>
+              <Typography
+                variant="body2"
+                fontWeight={700}
+                sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: 'text.primary' }}
+              >
+                Admin
+              </Typography>
+            </Box>
+          </Box>
+        </Box>
         <ListItemButton
           onClick={logout}
           sx={{
-            borderRadius: 2,
+            borderRadius: 3,
+            color: '#F43F5E',
             '&:hover': {
-              backgroundColor: 'rgba(37, 99, 235, 0.06)',
+              backgroundColor: 'rgba(244, 63, 94, 0.1)',
             },
           }}
         >
-          <ListItemIcon sx={{ color: 'text.secondary', minWidth: 40 }}>
+          <ListItemIcon sx={{ color: '#F43F5E', minWidth: 40 }}>
             <LogOut size={20} />
           </ListItemIcon>
-          <ListItemText
-            primary="Logout"
-            primaryTypographyProps={{
-              color: 'text.primary',
-            }}
-          />
+          <ListItemText primary="Logout" primaryTypographyProps={{ fontWeight: 600 }} />
         </ListItemButton>
       </Box>
-    </>
+    </Box>
   );
 
   return (
@@ -205,7 +302,7 @@ const Sidebar = ({ open, onClose }: SidebarProps) => {
           sx={{
             '& .MuiDrawer-paper': {
               width: 280,
-              backgroundColor: 'background.paper',
+              backgroundColor: theme.palette.background.paper,
               backgroundImage: 'none',
             },
           }}
@@ -223,9 +320,10 @@ const Sidebar = ({ open, onClose }: SidebarProps) => {
             flexShrink: 0,
             '& .MuiDrawer-paper': {
               width: 280,
-              backgroundColor: 'background.paper',
+              backgroundColor: theme.palette.background.paper,
               backgroundImage: 'none',
               border: 'none',
+              borderRight: `1px solid ${theme.palette.divider}`,
             },
           }}
         >

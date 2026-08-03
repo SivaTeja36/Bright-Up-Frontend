@@ -12,11 +12,16 @@ import {
   useTheme,
   useMediaQuery,
   Tooltip,
+  Divider,
 } from '@mui/material';
-import { Bell, Moon, Menu as MenuIcon, User, SquarePen } from 'lucide-react';
+import { Bell, Sun, Moon, Menu as MenuIcon, User, SquarePen, LogOut, UserRound } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { getUserInfo } from '../../api/auth';
 import { UserInfoResponse } from '../../types/auth';
+import { useAuth } from '../../context/AuthContext';
+import { useThemeMode } from '../../context/ThemeContext';
+import { HEADER_HEIGHT } from '../../layouts/layoutConstants';
+import BrightupLogo from '../BrightupLogo';
 
 interface NavbarProps {
   onMenuClick: () => void;
@@ -25,30 +30,22 @@ interface NavbarProps {
 const Navbar = ({ onMenuClick }: NavbarProps) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-
-  const { logout } = (() => {
-    try {
-      return { logout: () => { console.log("Logout called") } };
-    } catch {
-      return { logout: () => console.log("Logout fallback") };
-    }
-  })();
+  const { logout } = useAuth();
+  const { mode, toggleMode } = useThemeMode();
+  const isDark = mode === 'dark';
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [notificationAnchorEl, setNotificationAnchorEl] = useState<null | HTMLElement>(null);
   const [userInfo, setUserInfo] = useState<UserInfoResponse | null>(null);
   const [loadingUserInfo, setLoadingUserInfo] = useState(true);
-  const [fetchError, setFetchError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
         setLoadingUserInfo(true);
-        setFetchError(null);
         const data = await getUserInfo();
         setUserInfo(data);
       } catch (error) {
-        setFetchError('Failed to load user info.');
         console.error('Error fetching user info:', error);
       } finally {
         setLoadingUserInfo(false);
@@ -79,9 +76,11 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
   };
 
   const handleEditProfile = () => {
+    handleProfileMenuClose();
     console.log('Edit Profile clicked');
-    // You can route to a profile edit page or open a modal here
   };
+
+  const avatarGradient = `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 55%, ${theme.palette.secondary.main} 100%)`;
 
   return (
     <AppBar
@@ -90,26 +89,57 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
       sx={{
         width: { md: `calc(100% - 280px)` },
         ml: { md: '280px' },
-        backgroundColor: 'rgba(255, 255, 255, 0.8)',
+        backgroundColor: isDark
+          ? 'rgba(11, 18, 32, 0.72)'
+          : 'rgba(255, 255, 255, 0.72)',
         color: 'text.primary',
         backgroundImage: 'none',
-        borderBottom: '1px solid #E2E8F0',
-        backdropFilter: 'blur(8px)',
+        borderBottom: `1px solid ${theme.palette.divider}`,
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
       }}
     >
-      <Toolbar>
+      <Toolbar sx={{ minHeight: HEADER_HEIGHT }}>
         {isMobile && (
-          <IconButton color="inherit" edge="start" sx={{ mr: 2 }} onClick={onMenuClick}>
-            <MenuIcon />
-          </IconButton>
+          <>
+            <IconButton color="inherit" edge="start" sx={{ mr: 0.5 }} onClick={onMenuClick}>
+              <MenuIcon />
+            </IconButton>
+              <BrightupLogo
+                iconHeight={32}
+                textHeight={24}
+                gap={1.25}
+                color={isDark ? 'white' : 'dark'}
+                sx={{ mr: 1 }}
+              />
+          </>
         )}
+
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+          {/* Theme toggle */}
+          <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+            <Tooltip title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}>
+              <IconButton color="inherit" onClick={toggleMode}>
+                <AnimatePresenceIcon isDark={isDark} />
+              </IconButton>
+            </Tooltip>
+          </motion.div>
+        </Box>
 
         <Box sx={{ flexGrow: 1 }} />
 
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
             <IconButton color="inherit" sx={{ ml: 1 }} onClick={handleNotificationMenuOpen}>
-              <Badge badgeContent={3} color="error">
+              <Badge
+                badgeContent={3}
+                sx={{
+                  '& .MuiBadge-badge': {
+                    background: avatarGradient,
+                    color: '#FFFFFF',
+                  },
+                }}
+              >
                 <Bell size={20} />
               </Badge>
             </IconButton>
@@ -121,30 +151,31 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
               ml: 2,
               display: 'flex',
               alignItems: 'center',
-              border: '1px solid #E2E8F0',
-              borderRadius: 2,
+              border: `1px solid ${theme.palette.divider}`,
+              borderRadius: 3,
               py: 0.5,
               px: 1.2,
-              minWidth: { md: 180 },
+              minWidth: { md: 190 },
+              backgroundColor: theme.palette.background.paper,
+              boxShadow: `0px 2px 8px rgba(15, 23, 42, ${isDark ? 0.3 : 0.06})`,
             }}
           >
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <IconButton onClick={handleProfileMenuOpen} sx={{ p: 0, mr: 1 }} size="small">
                 <Box sx={{ position: 'relative' }}>
-                  <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.main' }}>
+                  <Avatar sx={{ width: 32, height: 32, background: avatarGradient }}>
                     <User size={16} />
                   </Avatar>
-                  {/* Green dot */}
                   <Box
                     sx={{
                       position: 'absolute',
                       bottom: 0,
                       right: 0,
-                      width: 8,
-                      height: 8,
-                      bgcolor: 'success.main',
+                      width: 9,
+                      height: 9,
+                      bgcolor: '#10B981',
                       borderRadius: '50%',
-                      border: '2px solid white',
+                      border: `2px solid ${theme.palette.background.paper}`,
                     }}
                   />
                 </Box>
@@ -164,7 +195,7 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
                 <Box sx={{ display: 'flex', flexDirection: 'column', minWidth: 0, flexGrow: 1 }}>
                   <Typography
                     variant="body2"
-                    fontWeight={600}
+                    fontWeight={700}
                     sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
                   >
                     {loadingUserInfo ? 'Loading...' : userInfo?.name || 'Sophia Johnson'}
@@ -172,25 +203,25 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
                   <Typography
                     variant="caption"
                     color="text.secondary"
-                    sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textTransform: 'capitalize' }}
+                    sx={{
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      textTransform: 'capitalize',
+                      fontWeight: 500,
+                    }}
                   >
                     {loadingUserInfo ? '' : userInfo?.role || 'CEO'}
                   </Typography>
                 </Box>
 
-                {/* Edit button */}
                 <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
-                <Tooltip title="Edit Profile">
-                  <IconButton
-                    size="small"
-                    sx={{ p: 0.5 }}
-                    onClick={handleEditProfile}
-                    color="inherit"
-                  >
-                    <SquarePen size={16} />
-                  </IconButton>
-                </Tooltip>
-              </motion.div>
+                  <Tooltip title="Edit Profile">
+                    <IconButton size="small" sx={{ p: 0.5 }} onClick={handleEditProfile} color="inherit">
+                      <SquarePen size={16} />
+                    </IconButton>
+                  </Tooltip>
+                </motion.div>
               </Box>
             )}
           </Box>
@@ -206,14 +237,36 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
           PaperProps={{
             sx: {
               mt: 1.5,
-              backgroundImage: theme.palette.gradient?.dark || undefined,
-              border: '1px solid #E2E8F0',
+              minWidth: 240,
+              borderRadius: 3,
+              border: `1px solid ${theme.palette.divider}`,
+              boxShadow: `0px 12px 40px rgba(15, 23, 42, ${isDark ? 0.5 : 0.12})`,
+              overflow: 'hidden',
             },
           }}
         >
-          <MenuItem onClick={handleProfileMenuClose}>Profile</MenuItem>
-          <MenuItem onClick={handleProfileMenuClose}>Settings</MenuItem>
-          <MenuItem onClick={handleLogout}>Logout</MenuItem>
+          <Box sx={{ px: 2, py: 1.5, background: avatarGradient }}>
+            <Typography variant="body2" fontWeight={700} color="#FFFFFF">
+              {userInfo?.name || 'Sophia Johnson'}
+            </Typography>
+            <Typography variant="caption" color="rgba(255, 255, 255, 0.85)">
+              {userInfo?.email || userInfo?.role || 'admin@brightup.com'}
+            </Typography>
+          </Box>
+          <Divider sx={{ borderColor: theme.palette.divider }} />
+          <MenuItem onClick={handleProfileMenuClose} sx={{ py: 1 }}>
+            <UserRound size={18} style={{ marginRight: 12, color: theme.palette.primary.main }} />
+            Profile
+          </MenuItem>
+          <MenuItem onClick={handleEditProfile} sx={{ py: 1 }}>
+            <SquarePen size={18} style={{ marginRight: 12, color: theme.palette.primary.main }} />
+            Edit Profile
+          </MenuItem>
+          <Divider sx={{ borderColor: theme.palette.divider }} />
+          <MenuItem onClick={handleLogout} sx={{ py: 1, color: '#BE123C' }}>
+            <LogOut size={18} style={{ marginRight: 12 }} />
+            Logout
+          </MenuItem>
         </Menu>
 
         {/* Notification Menu */}
@@ -226,16 +279,42 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
           PaperProps={{
             sx: {
               mt: 1.5,
-              width: 320,
-              maxHeight: 400,
-              backgroundImage: theme.palette.gradient?.dark || undefined,
-              border: '1px solid #E2E8F0',
+              width: 340,
+              maxHeight: 420,
+              borderRadius: 3,
+              border: `1px solid ${theme.palette.divider}`,
+              boxShadow: `0px 12px 40px rgba(15, 23, 42, ${isDark ? 0.5 : 0.12})`,
+              overflow: 'hidden',
             },
           }}
         >
-          <MenuItem onClick={handleNotificationMenuClose}>
+          <Box
+            sx={{
+              px: 2,
+              py: 1.5,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              backgroundColor: theme.palette.background.default,
+            }}
+          >
+            <Typography variant="body2" fontWeight={700}>
+              Notifications
+            </Typography>
+            <Badge
+              badgeContent={3}
+              sx={{
+                '& .MuiBadge-badge': {
+                  background: avatarGradient,
+                  color: '#FFFFFF',
+                },
+              }}
+            />
+          </Box>
+          <Divider sx={{ borderColor: theme.palette.divider }} />
+          <MenuItem onClick={handleNotificationMenuClose} sx={{ py: 1.5, borderBottom: `1px solid ${theme.palette.divider}` }}>
             <Box>
-              <Typography variant="body2" fontWeight={500}>
+              <Typography variant="body2" fontWeight={600}>
                 New student joined
               </Typography>
               <Typography variant="caption" color="text.secondary">
@@ -243,9 +322,9 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
               </Typography>
             </Box>
           </MenuItem>
-          <MenuItem onClick={handleNotificationMenuClose}>
+          <MenuItem onClick={handleNotificationMenuClose} sx={{ py: 1.5, borderBottom: `1px solid ${theme.palette.divider}` }}>
             <Box>
-              <Typography variant="body2" fontWeight={500}>
+              <Typography variant="body2" fontWeight={600}>
                 Syllabus updated
               </Typography>
               <Typography variant="caption" color="text.secondary">
@@ -253,9 +332,9 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
               </Typography>
             </Box>
           </MenuItem>
-          <MenuItem onClick={handleNotificationMenuClose}>
+          <MenuItem onClick={handleNotificationMenuClose} sx={{ py: 1.5 }}>
             <Box>
-              <Typography variant="body2" fontWeight={500}>
+              <Typography variant="body2" fontWeight={600}>
                 Class rescheduled
               </Typography>
               <Typography variant="caption" color="text.secondary">
@@ -266,6 +345,21 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
         </Menu>
       </Toolbar>
     </AppBar>
+  );
+};
+
+const AnimatePresenceIcon = ({ isDark }: { isDark: boolean }) => {
+  return (
+    <motion.div
+      key={isDark ? 'dark' : 'light'}
+      initial={{ rotate: -90, opacity: 0, scale: 0.6 }}
+      animate={{ rotate: 0, opacity: 1, scale: 1 }}
+      exit={{ rotate: 90, opacity: 0, scale: 0.6 }}
+      transition={{ duration: 0.3 }}
+      style={{ display: 'flex' }}
+    >
+      {isDark ? <Sun size={20} /> : <Moon size={20} />}
+    </motion.div>
   );
 };
 

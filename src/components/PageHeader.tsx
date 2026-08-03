@@ -55,7 +55,7 @@ const PageHeader = ({ title, subtitle, actions, breadcrumbs }: PageHeaderProps) 
             variant="h4"
             fontWeight="bold"
             color="text.primary"
-            sx={{ fontSize: { xs: '1.375rem', sm: '1.5rem' }, lineHeight: 1.3 }}
+            sx={{ fontSize: { xs: '1.25rem', sm: '1.3rem' }, lineHeight: 1.3 }}
           >
             {title}
           </Typography>
