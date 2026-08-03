@@ -105,7 +105,7 @@ const Login = () => {
               }}
             >
               <BrightupLogo
-                iconWidth={{ md: 56, lg: 64 }}
+                iconWidth={{ md: 56, lg: 100 }}
                 textWidth={{ md: 195, lg: 220 }}
                 gap={2}
                 color="white"

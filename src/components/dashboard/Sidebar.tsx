@@ -195,8 +195,8 @@ const Sidebar = ({ open, onClose }: SidebarProps) => {
               style={{ width: '100%' }}
             >
               <BrightupLogo
-                iconWidth={50}
-                textWidth={160}
+                iconWidth={60}
+                textWidth={140}
                 gap={1.5}
                 color="white"
               />
