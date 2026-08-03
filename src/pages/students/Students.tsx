@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
   Box,
-  CircularProgress,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -11,7 +10,6 @@ import {
   Chip,
   Tooltip,
 } from '@mui/material';
-import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import {
   User,
   Mail,
@@ -21,51 +19,63 @@ import {
   Calendar,
   X,
   UserCircle,
+  Edit,
 } from 'lucide-react';
+import { RiDeleteBin6Line } from "react-icons/ri";
+import { useSnackbar } from 'notistack';
 import AnimatedPage from '../../components/AnimatedPage';
 import PageHeader from '../../components/PageHeader';
-import { useNavigate } from 'react-router-dom';
-import { getAllStudents } from '../../api/student';
+import { deleteStudent, getAllStudents } from '../../api/student';
 import { StudentResponse } from '../../types/student';
 import AnimatedCard from '../../components/AnimatedCard';
+import AddStudentDialog from '../../components/dialogs/AddStudentDialog';
+import DataTable from '../../components/DataTable';
+import { GridColDef } from '@mui/x-data-grid';
 
 const Students: React.FC = () => {
-  const navigate = useNavigate();
   const [students, setStudents] = useState<StudentResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<StudentResponse | null>(null);
+  const [addStudentOpen, setAddStudentOpen] = useState(false);
+
+  const { enqueueSnackbar } = useSnackbar();
+
+  const handleDelete = async (id: number, name: string) => {
+    if (!window.confirm(`Delete student "${name}"?`)) return;
+    try {
+      await deleteStudent(id);
+      enqueueSnackbar('Student deleted successfully!', { variant: 'success' });
+      fetchStudents();
+    } catch {
+      enqueueSnackbar('Failed to delete student', { variant: 'error' });
+    }
+  };
+
+  const fetchStudents = async () => {
+    try {
+      setLoading(true);
+      const data = await getAllStudents();
+      setStudents(data);
+    } catch (err) {
+      setError('Failed to fetch students');
+      console.error('Error fetching students:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchStudents = async () => {
-      try {
-        setLoading(true);
-        const data = await getAllStudents();
-        setStudents(data);
-      } catch (err) {
-        setError('Failed to fetch students');
-        console.error('Error fetching students:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchStudents();
   }, []);
 
   const columns: GridColDef[] = [
     {
-      field: 'id',
-      headerName: 'ID',
-      flex: 0.5,
-      align: 'center',
-      headerAlign: 'center',
-    },
-    {
       field: 'name',
       headerName: 'Name',
-      flex: 1.2,
+      flex: 1,
+      minWidth: 120,
       renderCell: (params) => (
         <Stack direction="row" alignItems="center" spacing={1}>
           <User size={18} />
@@ -76,31 +86,34 @@ const Students: React.FC = () => {
     {
       field: 'gender',
       headerName: 'Gender',
-      flex: 0.8,
-      renderCell: (params) => <span>{params.value}</span>,
+      flex: 1,
+      minWidth: 120,
     },
     {
       field: 'created_at',
       headerName: 'Created At',
-      flex: 1.2,
+      flex: 1,
+      minWidth: 120,
       valueFormatter: (params) =>
-        new Date(params.value as string).toLocaleString(),
+        new Date(params.value as string).toLocaleDateString(),
     },
     {
       field: 'email',
       headerName: 'Email',
-      flex: 1.5,
+      flex: 1,
+      minWidth: 120,
       renderCell: (params) => (
-        <Stack direction="row" alignItems="center" spacing={1}>
+        <Stack direction="row" alignItems="center" spacing={1} sx={{ minWidth: 0, width: '100%' }}>
           <Mail size={16} />
-          <span>{params.value}</span>
+          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{params.value}</span>
         </Stack>
       ),
     },
     {
       field: 'phone_number',
       headerName: 'Phone',
-      flex: 1.2,
+      flex: 1,
+      minWidth: 120,
       renderCell: (params) => (
         <Stack direction="row" alignItems="center" spacing={1}>
           <Phone size={16} />
@@ -111,13 +124,47 @@ const Students: React.FC = () => {
     {
       field: 'is_active',
       headerName: 'Status',
-      flex: 0.8,
+      flex: 1,
+      minWidth: 120,
+      align: 'center',
+      headerAlign: 'center',
       renderCell: (params) =>
         params.value ? (
-          <Chip label="Active" color="success" size="small" />
+          <Chip label="Active" color="success" size="small" sx={{ fontWeight: 600 }} />
         ) : (
-          <Chip label="Inactive" color="default" size="small" />
+          <Chip label="Inactive" color="default" size="small" sx={{ fontWeight: 600 }} />
         ),
+    },
+    {
+      field: 'actions',
+      headerName: 'Actions',
+      flex: 1,
+      minWidth: 130,
+      sortable: false,
+      align: 'center',
+      headerAlign: 'center',
+      renderCell: (params) => (
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+          <IconButton
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation();
+              console.log('Edit student', params.row.id);
+            }}
+          >
+            <Edit size={18} />
+          </IconButton>
+          <IconButton
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDelete(params.row.id, params.row.name);
+            }}
+          >
+            <RiDeleteBin6Line size={18} />
+          </IconButton>
+        </Box>
+      ),
     },
   ];
 
@@ -136,51 +183,36 @@ const Students: React.FC = () => {
       <PageHeader
         title="Students"
         subtitle="Manage student information and enrollments"
-        action={{
-          label: "Add Student",
-          onClick: () => navigate('/students/add'),
-          icon: <User size={20} />,
-        }}
+        actions={[
+          {
+            label: "Add Student",
+            onClick: () => setAddStudentOpen(true),
+            icon: <User size={20} />,
+          },
+        ]}
         breadcrumbs={[
           { label: 'Dashboard', to: '/' },
           { label: 'Students' },
         ]}
       />
       <AnimatedCard>
-        <Box sx={{ height: 600, width: '100%' }}>
-          {loading ? (
-            <Box display="flex" justifyContent="center" alignItems="center" height="100%">
-              <CircularProgress />
-            </Box>
-          ) : error ? (
-            <Box display="flex" justifyContent="center" alignItems="center" height="100%">
-              {error}
-            </Box>
-          ) : (
-            <DataGrid
-              rows={students}
-              columns={columns}
-              getRowId={(row) => row.id}
-              initialState={{
-                pagination: {
-                  paginationModel: { page: 0, pageSize: 10 },
-                },
-              }}
-              pageSizeOptions={[5, 10, 20]}
-              disableRowSelectionOnClick
-              onRowClick={handleRowClick}
-              sx={{
-                cursor: 'pointer',
-                '& .MuiDataGrid-row:hover': {
-                  backgroundColor: 'rgba(0,0,0,0.03)',
-                },
-                '& .MuiDataGrid-cell': {
-                  alignItems: 'center',
-                  display: 'flex',
-                },
-              }}
-            />
-          )}
+        <Box sx={{ p: 2 }}>
+          <DataTable
+            rows={students}
+            columns={columns}
+            loading={loading}
+            error={error}
+            getRowId={(row) => row.id}
+            initialState={{
+              pagination: {
+                paginationModel: { page: 0, pageSize: 10 },
+              },
+            }}
+            pageSizeOptions={[5, 10, 20]}
+            disableRowSelectionOnClick
+            onRowClick={handleRowClick}
+            sx={{ cursor: 'pointer' }}
+          />
         </Box>
       </AnimatedCard>
 
@@ -197,7 +229,7 @@ const Students: React.FC = () => {
         </DialogTitle>
         <DialogContent>
           {selectedStudent && (
-            <Box sx={{ p: 2 }}>
+            <Box sx={{ p: 0 }}>
               <Stack spacing={2}>
                 <Stack direction="row" spacing={2} alignItems="center">
                   <User size={22} />
@@ -249,6 +281,12 @@ const Students: React.FC = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      <AddStudentDialog
+        open={addStudentOpen}
+        onClose={() => setAddStudentOpen(false)}
+        onCreated={fetchStudents}
+      />
     </AnimatedPage>
   );
 };

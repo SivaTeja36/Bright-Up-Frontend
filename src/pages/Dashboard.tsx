@@ -59,7 +59,7 @@ const Dashboard = () => {
     { name: 'DevOps', value: 15 },
   ];
 
-  const COLORS = ['#00BFFF', '#8A2BE2', '#1DE9B6', '#FFB74D'];
+  const COLORS = ['#2563EB', '#0EA5E9', '#10B981', '#F59E0B'];
 
   const revenueData = [
     { name: 'Jan', revenue: 12000 },
@@ -85,7 +85,7 @@ const Dashboard = () => {
             title="Total Students"
             value={loading ? '...' : studentCount}
             icon={<GraduationCap size={24} />}
-            color="#00BFFF"
+            color="#2563EB"
             increase="+12% from last month"
           />
         </Grid>
@@ -95,7 +95,7 @@ const Dashboard = () => {
             title="Active Batches"
             value={loading ? '...' : batchCount}
             icon={<CalendarDays size={24} />}
-            color="#1DE9B6"
+            color="#0EA5E9"
             increase="+3 new this month"
           />
         </Grid>
@@ -105,7 +105,7 @@ const Dashboard = () => {
             title="Syllabus Available"
             value={loading ? '...' : syllabusCount}
             icon={<BookOpen size={24} />}
-            color="#8A2BE2"
+            color="#8B5CF6"
             increase="+5 added recently"
           />
         </Grid>
@@ -115,7 +115,7 @@ const Dashboard = () => {
             title="Total Revenue"
             value="₹135,420"
             icon={<TrendingUp size={24} />}
-            color="#FFB74D"
+            color="#F59E0B"
             increase="+8.2% growth rate"
           />
         </Grid>
@@ -125,24 +125,25 @@ const Dashboard = () => {
           <AnimatedCard delay={0.2}>
             <CardHeader title="Monthly Student Enrollment" />
             <CardContent>
-              <Box sx={{ height: 300, width: '100%' }}>
+              <Box sx={{ height: { xs: 260, sm: 300 }, width: '100%' }}>
                 <ResponsiveContainer>
                   <BarChart data={monthlyEnrollmentData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                    <XAxis dataKey="name" stroke="rgba(255,255,255,0.7)" />
-                    <YAxis stroke="rgba(255,255,255,0.7)" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
+                    <XAxis dataKey="name" stroke="#94A3B8" />
+                    <YAxis stroke="#94A3B8" />
                     <Tooltip 
                       contentStyle={{ 
-                        backgroundColor: 'rgba(16, 42, 67, 0.9)', 
-                        borderColor: 'rgba(255,255,255,0.1)',
-                        borderRadius: 8
+                        backgroundColor: 'rgba(255, 255, 255, 0.98)', 
+                        borderColor: '#E2E8F0',
+                        borderRadius: 8,
+                        boxShadow: '0px 8px 24px rgba(15, 23, 42, 0.12)'
                       }} 
                     />
                     <Bar dataKey="students" fill="url(#colorGradient)" radius={[4, 4, 0, 0]} />
                     <defs>
                       <linearGradient id="colorGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#8A2BE2" stopOpacity={1} />
-                        <stop offset="100%" stopColor="#00BFFF" stopOpacity={0.6} />
+                        <stop offset="0%" stopColor="#2563EB" stopOpacity={1} />
+                        <stop offset="100%" stopColor="#0EA5E9" stopOpacity={0.6} />
                       </linearGradient>
                     </defs>
                   </BarChart>
@@ -157,7 +158,7 @@ const Dashboard = () => {
           <AnimatedCard delay={0.3}>
             <CardHeader title="Course Distribution" />
             <CardContent>
-              <Box sx={{ height: 300, width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+              <Box sx={{ height: { xs: 260, sm: 300 }, width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                 <ResponsiveContainer>
                   <PieChart>
                     <Pie
@@ -177,9 +178,10 @@ const Dashboard = () => {
                     </Pie>
                     <Tooltip 
                       contentStyle={{ 
-                        backgroundColor: 'rgba(16, 42, 67, 0.9)', 
-                        borderColor: 'rgba(255,255,255,0.1)',
-                        borderRadius: 8
+                        backgroundColor: 'rgba(255, 255, 255, 0.98)', 
+                        borderColor: '#E2E8F0',
+                        borderRadius: 8,
+                        boxShadow: '0px 8px 24px rgba(15, 23, 42, 0.12)'
                       }} 
                     />
                   </PieChart>
@@ -194,17 +196,18 @@ const Dashboard = () => {
           <AnimatedCard delay={0.4}>
             <CardHeader title="Monthly Revenue" />
             <CardContent>
-              <Box sx={{ height: 300, width: '100%' }}>
+              <Box sx={{ height: { xs: 260, sm: 300 }, width: '100%' }}>
                 <ResponsiveContainer>
                   <LineChart data={revenueData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                    <XAxis dataKey="name" stroke="rgba(255,255,255,0.7)" />
-                    <YAxis stroke="rgba(255,255,255,0.7)" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
+                    <XAxis dataKey="name" stroke="#94A3B8" />
+                    <YAxis stroke="#94A3B8" />
                     <Tooltip 
                       contentStyle={{ 
-                        backgroundColor: 'rgba(16, 42, 67, 0.9)', 
-                        borderColor: 'rgba(255,255,255,0.1)',
-                        borderRadius: 8
+                        backgroundColor: 'rgba(255, 255, 255, 0.98)', 
+                        borderColor: '#E2E8F0',
+                        borderRadius: 8,
+                        boxShadow: '0px 8px 24px rgba(15, 23, 42, 0.12)'
                       }} 
                       formatter={(value) => [`₹${value}`, 'Revenue']}
                     />
@@ -212,7 +215,7 @@ const Dashboard = () => {
                     <Line
                       type="monotone"
                       dataKey="revenue"
-                      stroke="#1DE9B6"
+                      stroke="#2563EB"
                       strokeWidth={3}
                       dot={{ r: 4 }}
                       activeDot={{ r: 6 }}
@@ -241,8 +244,8 @@ const Dashboard = () => {
                     sx={{
                       p: 1.5,
                       borderRadius: 2,
-                      bgcolor: 'rgba(0, 0, 0, 0.15)',
-                      border: '1px solid rgba(255, 255, 255, 0.05)',
+                      bgcolor: '#F8FAFC',
+                      border: '1px solid #E2E8F0',
                     }}
                   >
                     <Typography variant="body2" fontWeight={500}>
@@ -275,8 +278,8 @@ const Dashboard = () => {
                     sx={{
                       p: 1.5,
                       borderRadius: 2,
-                      bgcolor: 'rgba(0, 0, 0, 0.15)',
-                      border: '1px solid rgba(255, 255, 255, 0.05)',
+                      bgcolor: '#F8FAFC',
+                      border: '1px solid #E2E8F0',
                     }}
                   >
                     <Typography variant="body2" fontWeight={500}>

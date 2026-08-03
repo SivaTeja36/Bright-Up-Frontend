@@ -1,41 +1,57 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Box, CircularProgress, Chip, Stack, Tooltip, Dialog, DialogTitle, DialogContent, Typography, IconButton
+  Box, Chip, Stack, Tooltip, Dialog, DialogTitle, DialogContent, Typography, IconButton
 } from '@mui/material';
-import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import { BookOpen, X } from 'lucide-react';
+import { GridColDef } from '@mui/x-data-grid';
+import { BookOpen, Edit, X } from 'lucide-react';
+import { RiDeleteBin6Line } from "react-icons/ri";
+import { useSnackbar } from 'notistack';
 import AnimatedPage from '../../components/AnimatedPage';
 import PageHeader from '../../components/PageHeader';
-import { useNavigate } from 'react-router-dom';
-import { getAllSyllabi } from '../../api/syllabus';
+import { deleteSyllabus, getAllSyllabi } from '../../api/syllabus';
 import { SyllabusResponse } from '../../types/syllabus';
 import AnimatedCard from '../../components/AnimatedCard';
+import CreateSyllabusDialog from '../../components/dialogs/CreateSyllabusDialog';
+import DataTable from '../../components/DataTable';
 
 const Syllabus = () => {
-  const navigate = useNavigate();
   const [syllabi, setSyllabi] = useState<SyllabusResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [createOpen, setCreateOpen] = useState(false);
 
   // Modal state
   const [open, setOpen] = useState(false);
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
   const [selectedSyllabusName, setSelectedSyllabusName] = useState<string>('');
 
-  useEffect(() => {
-    const fetchSyllabi = async () => {
-      try {
-        setLoading(true);
-        const data = await getAllSyllabi();
-        setSyllabi(data);
-      } catch (err) {
-        setError('Failed to fetch syllabi');
-        console.error('Error fetching syllabi:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const { enqueueSnackbar } = useSnackbar();
 
+  const handleDelete = async (id: number, name: string) => {
+    if (!window.confirm(`Delete syllabus "${name}"?`)) return;
+    try {
+      await deleteSyllabus(id);
+      enqueueSnackbar('Syllabus deleted successfully!', { variant: 'success' });
+      fetchSyllabi();
+    } catch {
+      enqueueSnackbar('Failed to delete syllabus', { variant: 'error' });
+    }
+  };
+
+  const fetchSyllabi = async () => {
+    try {
+      setLoading(true);
+      const data = await getAllSyllabi();
+      setSyllabi(data);
+    } catch (err) {
+      setError('Failed to fetch syllabi');
+      console.error('Error fetching syllabi:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchSyllabi();
   }, []);
 
@@ -52,12 +68,12 @@ const Syllabus = () => {
   };
 
   const columns: GridColDef[] = [
-    { field: 'id', headerName: 'ID', width: 90 },
-    { field: 'name', headerName: 'Name', width: 200 },
+    { field: 'name', headerName: 'Name', flex: 1, minWidth: 130 },
     {
       field: 'topics',
       headerName: 'Topics',
-      width: 150,
+      flex: 1,
+      minWidth: 130,
       renderCell: (params) => {
         const topics: string[] = params.value;
         const name: string = params.row.name;
@@ -67,7 +83,7 @@ const Syllabus = () => {
             color="primary"
             clickable
             onClick={() => handleOpenTopics(topics, name)}
-            sx={{ fontWeight: 500 }}
+            sx={{ fontWeight: 600 }}
           />
         );
       },
@@ -77,14 +93,35 @@ const Syllabus = () => {
     {
       field: 'created_at',
       headerName: 'Created At',
-      width: 200,
-      valueFormatter: (params) => new Date(params.value).toLocaleString(),
+      flex: 1,
+      minWidth: 130,
+      valueFormatter: (params) => new Date(params.value).toLocaleDateString(),
     },
     {
       field: 'updated_at',
       headerName: 'Updated At',
-      width: 200,
-      valueFormatter: (params) => new Date(params.value).toLocaleString(),
+      flex: 1,
+      minWidth: 130,
+      valueFormatter: (params) => new Date(params.value).toLocaleDateString(),
+    },
+    {
+      field: 'actions',
+      headerName: 'Actions',
+      flex: 1,
+      minWidth: 130,
+      sortable: false,
+      align: 'center',
+      headerAlign: 'center',
+      renderCell: (params) => (
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+          <IconButton size="small" onClick={() => console.log('Edit syllabus', params.row.id)}>
+            <Edit size={18} />
+          </IconButton>
+          <IconButton size="small" onClick={() => handleDelete(params.row.id, params.row.name)}>
+            <RiDeleteBin6Line size={18} />
+          </IconButton>
+        </Box>
+      ),
     },
   ];
 
@@ -93,43 +130,34 @@ const Syllabus = () => {
       <PageHeader
         title="Syllabus"
         subtitle="Manage course syllabi and topics"
-        action={{
-          label: "Create Syllabus",
-          onClick: () => navigate('/syllabus/create'),
-          icon: <BookOpen size={20} />
-        }}
+        actions={[
+          {
+            label: "Create Syllabus",
+            onClick: () => setCreateOpen(true),
+            icon: <BookOpen size={20} />,
+          },
+        ]}
         breadcrumbs={[
           { label: 'Dashboard', to: '/' },
           { label: 'Syllabus' }
         ]}
       />
       <AnimatedCard>
-        <Box sx={{ height: 600, width: '100%' }}>
-          {loading && (
-            <Box display="flex" justifyContent="center" alignItems="center" height="100%">
-              <CircularProgress />
-            </Box>
-          )}
-          {error && (
-            <Box display="flex" justifyContent="center" alignItems="center" height="100%">
-              {error}
-            </Box>
-          )}
-          {!loading && !error && (
-            <DataGrid
-              rows={syllabi}
-              columns={columns}
-              getRowId={(row) => row.id}
-              initialState={{
-                pagination: {
-                  paginationModel: { page: 0, pageSize: 10 },
-                },
-              }}
-              pageSizeOptions={[5, 10, 20]}
-              checkboxSelection
-              disableRowSelectionOnClick
-            />
-          )}
+        <Box sx={{ p: 2 }}>
+          <DataTable
+            rows={syllabi}
+            columns={columns}
+            loading={loading}
+            error={error}
+            getRowId={(row) => row.id}
+            initialState={{
+              pagination: {
+                paginationModel: { page: 0, pageSize: 10 },
+              },
+            }}
+            pageSizeOptions={[5, 10, 20]}
+            disableRowSelectionOnClick
+          />
         </Box>
       </AnimatedCard>
 
@@ -164,6 +192,12 @@ const Syllabus = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      <CreateSyllabusDialog
+        open={createOpen}
+        onClose={() => setCreateOpen(false)}
+        onCreated={fetchSyllabi}
+      />
     </AnimatedPage>
   );
 };

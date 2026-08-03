@@ -21,15 +21,16 @@ const DashboardLayout = () => {
         component="main"
         sx={{
           flexGrow: 1,
+          minWidth: 0,
           width: { md: `calc(100% - 280px)` },
-          background: theme.palette.gradient.main,
+          background: 'linear-gradient(180deg, #F8FAFC 0%, #EEF2FF 100%)',
           backgroundSize: 'cover',
           backgroundAttachment: 'fixed',
         }}
       >
         <Navbar onMenuClick={handleSidebarToggle} />
         <Toolbar />
-        <Box sx={{ p: 3, pt: 4 }}>
+        <Box sx={{ p: { xs: 2, sm: 3 }, pt: { xs: 2, sm: 4 }, maxWidth: '100%', overflowX: 'hidden' }}>
           <Outlet />
         </Box>
       </Box>

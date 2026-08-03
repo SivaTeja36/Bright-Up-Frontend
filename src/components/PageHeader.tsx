@@ -7,20 +7,24 @@ interface BreadcrumbItem {
   to?: string;
 }
 
+interface PageAction {
+  label: string;
+  onClick: () => void;
+  icon?: ReactNode;
+  variant?: 'text' | 'outlined' | 'contained';
+  color?: 'inherit' | 'primary' | 'secondary' | 'success' | 'error' | 'info' | 'warning';
+}
+
 interface PageHeaderProps {
   title: string;
   subtitle?: string;
-  action?: {
-    label: string;
-    onClick: () => void;
-    icon?: ReactNode;
-  };
+  actions?: PageAction[];
   breadcrumbs?: BreadcrumbItem[];
 }
 
-const PageHeader = ({ title, subtitle, action, breadcrumbs }: PageHeaderProps) => {
+const PageHeader = ({ title, subtitle, actions, breadcrumbs }: PageHeaderProps) => {
   return (
-    <Box mb={4}>
+    <Box mb={{ xs: 3, sm: 4 }}>
       {breadcrumbs && (
         <Breadcrumbs sx={{ mb: 1 }}>
           {breadcrumbs.map((item, index) => {
@@ -45,9 +49,14 @@ const PageHeader = ({ title, subtitle, action, breadcrumbs }: PageHeaderProps) =
         </Breadcrumbs>
       )}
       
-      <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Box>
-          <Typography variant="h4" fontWeight="bold" color="text.primary">
+      <Box display="flex" justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={2}>
+        <Box sx={{ minWidth: 0 }}>
+          <Typography
+            variant="h4"
+            fontWeight="bold"
+            color="text.primary"
+            sx={{ fontSize: { xs: '1.375rem', sm: '1.5rem' }, lineHeight: 1.3 }}
+          >
             {title}
           </Typography>
           {subtitle && (
@@ -57,15 +66,20 @@ const PageHeader = ({ title, subtitle, action, breadcrumbs }: PageHeaderProps) =
           )}
         </Box>
         
-        {action && (
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={action.onClick}
-            startIcon={action.icon}
-          >
-            {action.label}
-          </Button>
+        {actions && actions.length > 0 && (
+          <Box display="flex" gap={1} flexWrap="wrap" alignItems="center">
+            {actions.map((action, index) => (
+              <Button
+                key={index}
+                variant={action.variant || 'contained'}
+                color={action.color || 'primary'}
+                onClick={action.onClick}
+                startIcon={action.icon}
+              >
+                {action.label}
+              </Button>
+            ))}
+          </Box>
         )}
       </Box>
     </Box>

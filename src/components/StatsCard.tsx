@@ -14,7 +14,7 @@ interface StatsCardProps {
 const cardVariants = {
   hover: {
     scale: 1.03,
-    boxShadow: '0px 10px 30px rgba(0, 0, 0, 0.2)',
+    boxShadow: '0px 10px 30px rgba(37, 99, 235, 0.15)',
     transition: {
       duration: 0.3,
     },
@@ -33,7 +33,7 @@ const StatsCard = ({ title, value, icon, color, increase, onClick }: StatsCardPr
         sx={{ 
           height: '100%',
           cursor: onClick ? 'pointer' : 'default',
-          background: `linear-gradient(135deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.1) 100%), ${color}22`,
+          background: `linear-gradient(135deg, ${color}12 0%, ${color}04 100%), #FFFFFF`,
           borderLeft: `4px solid ${color}`,
           transition: 'all 0.3s ease-in-out',
         }}
@@ -57,10 +57,10 @@ const StatsCard = ({ title, value, icon, color, increase, onClick }: StatsCardPr
             <motion.div variants={iconVariants}>
               <IconButton 
                 sx={{ 
-                  backgroundColor: `${color}22`, 
+                  backgroundColor: `${color}1A`, 
                   color: color,
                   '&:hover': {
-                    backgroundColor: `${color}44`,
+                    backgroundColor: `${color}33`,
                   }
                 }}
                 disableRipple

@@ -7,8 +7,18 @@ export const login = async (credentials: LoginRequest): Promise<LoginResponse> =
   return response.data.data;
 };
 
-export const getAllUsers = async (): Promise<User[]> => {
-  const response = await api.get<ApiResponse<User[]>>('/users');
+export interface GetUsersParams {
+  search?: string;
+  filter_by?: string;
+  filter_values?: string;
+  sort_by?: string;
+  order_by?: string;
+  page?: number;
+  page_size?: number;
+}
+
+export const getAllUsers = async (params?: GetUsersParams): Promise<User[]> => {
+  const response = await api.get<ApiResponse<User[]>>('/users', { params });
   return response.data.data;
 };
 

@@ -90,9 +90,10 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
       sx={{
         width: { md: `calc(100% - 280px)` },
         ml: { md: '280px' },
-        backgroundColor: 'transparent',
+        backgroundColor: 'rgba(255, 255, 255, 0.8)',
+        color: 'text.primary',
         backgroundImage: 'none',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+        borderBottom: '1px solid #E2E8F0',
         backdropFilter: 'blur(8px)',
       }}
     >
@@ -120,11 +121,11 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
               ml: 2,
               display: 'flex',
               alignItems: 'center',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
+              border: '1px solid #E2E8F0',
               borderRadius: 2,
               py: 0.5,
               px: 1.2,
-              minWidth: 180,
+              minWidth: { md: 180 },
             }}
           >
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
@@ -141,7 +142,7 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
                       right: 0,
                       width: 8,
                       height: 8,
-                      bgcolor: 'green',
+                      bgcolor: 'success.main',
                       borderRadius: '50%',
                       border: '2px solid white',
                     }}
@@ -206,7 +207,7 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
             sx: {
               mt: 1.5,
               backgroundImage: theme.palette.gradient?.dark || undefined,
-              border: '1px solid rgba(255, 255, 255, 0.1)',
+              border: '1px solid #E2E8F0',
             },
           }}
         >
@@ -228,7 +229,7 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
               width: 320,
               maxHeight: 400,
               backgroundImage: theme.palette.gradient?.dark || undefined,
-              border: '1px solid rgba(255, 255, 255, 0.1)',
+              border: '1px solid #E2E8F0',
             },
           }}
         >

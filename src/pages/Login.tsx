@@ -56,7 +56,7 @@ const Login = () => {
           alignItems: 'center',
           justifyContent: 'center',
           bgcolor: 'gradient.main',
-          backgroundImage: 'linear-gradient(135deg, #0A1929 0%, #311B92 100%)',
+          backgroundImage: 'linear-gradient(135deg, #1E40AF 0%, #2563EB 45%, #0EA5E9 100%)',
           backgroundSize: 'cover',
           p: 2,
         }}
@@ -69,9 +69,9 @@ const Login = () => {
           sx={{
             maxWidth: 450,
             width: '100%',
-            px: 4,
-            py: 5,
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
+            px: { xs: 2.5, sm: 4 },
+            py: { xs: 3.5, sm: 5 },
+            boxShadow: '0 8px 32px rgba(15, 23, 42, 0.15)',
           }}
         >
           <Box
@@ -94,13 +94,14 @@ const Login = () => {
             >
               <Box
                 sx={{
-                  background: 'linear-gradient(135deg, #00BFFF 0%, #8A2BE2 100%)',
+                  background: 'linear-gradient(135deg, #2563EB 0%, #0EA5E9 100%)',
                   borderRadius: '50%',
                   p: 2,
                   mb: 2,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
+                  boxShadow: '0px 8px 24px rgba(37, 99, 235, 0.35)',
                 }}
               >
                 <BookOpen size={32} color="white" />
@@ -138,7 +139,7 @@ const Login = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <Alert severity="error" sx={{ mb: 3, bgcolor: 'error.dark' }}>
+              <Alert severity="error" sx={{ mb: 3 }}>
                 {error}
               </Alert>
             </motion.div>
@@ -216,31 +217,20 @@ const Login = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.7 }}
             >
-              <Box
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                color="primary"
+                size="large"
+                disabled={loading}
                 sx={{
-                  background: 'linear-gradient(90deg, #00BFFF 0%, #8A2BE2 100%)',
-                  borderRadius: 2,
-                  p: '2px',
+                  py: 1.5,
+                  boxShadow: '0px 6px 16px rgba(37, 99, 235, 0.3)',
                 }}
               >
-                <Button
-                  type="submit"
-                  fullWidth
-                  variant="contained"
-                  size="large"
-                  disabled={loading}
-                  sx={{
-                    py: 1.5,
-                    bgcolor: 'background.paper',
-                    '&:hover': {
-                      bgcolor: 'background.paper',
-                      opacity: 0.9,
-                    },
-                  }}
-                >
-                  {loading ? <CircularProgress size={24} color="inherit" /> : 'Login'}
-                </Button>
-              </Box>
+                {loading ? <CircularProgress size={24} color="inherit" /> : 'Login'}
+              </Button>
             </motion.div>
           </Box>
         </Card>
