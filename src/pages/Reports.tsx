@@ -8,10 +8,6 @@ const Reports = () => {
       <PageHeader
         title="Reports"
         subtitle="View system analytics and reports"
-        breadcrumbs={[
-          { label: 'Dashboard', to: '/' },
-          { label: 'Reports' }
-        ]}
       />
       <Box>
         {/* Reports implementation will go here */}

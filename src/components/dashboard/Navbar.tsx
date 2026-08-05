@@ -9,11 +9,14 @@ import {
   Menu,
   MenuItem,
   Badge,
+  Breadcrumbs,
+  Link,
   useTheme,
   useMediaQuery,
   Tooltip,
   Divider,
 } from '@mui/material';
+import { Link as RouterLink, useLocation } from 'react-router-dom';
 import { Bell, Sun, Moon, Menu as MenuIcon, User, SquarePen, LogOut, UserRound } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { getUserInfo } from '../../api/auth';
@@ -27,12 +30,50 @@ interface NavbarProps {
   onMenuClick: () => void;
 }
 
+interface BreadcrumbItem {
+  label: string;
+  to?: string;
+}
+
+const BREADCRUMB_LABELS: Record<string, string> = {
+  dashboard: 'Dashboard',
+  users: 'Users',
+  syllabus: 'Syllabus',
+  batches: 'Batches',
+  students: 'Students',
+  reports: 'Reports',
+};
+
+const getBreadcrumbs = (pathname: string): BreadcrumbItem[] => {
+  const segments = pathname.split('/').filter(Boolean);
+  if (segments.length === 0) return [{ label: 'Dashboard' }];
+
+  const crumbs: BreadcrumbItem[] = [];
+  const main = segments[0];
+  const mainLabel = BREADCRUMB_LABELS[main];
+
+  if (main && main !== 'dashboard') {
+    crumbs.push({ label: 'Dashboard', to: '/dashboard' });
+  }
+  if (mainLabel) {
+    if (segments.length === 1) {
+      crumbs.push({ label: mainLabel });
+    } else {
+      crumbs.push({ label: mainLabel, to: `/${main}` });
+      crumbs.push({ label: main === 'batches' ? `Batch #${segments[1]}` : `${mainLabel} #${segments[1]}` });
+    }
+  }
+  return crumbs;
+};
+
 const Navbar = ({ onMenuClick }: NavbarProps) => {
   const theme = useTheme();
+  const location = useLocation();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const { logout } = useAuth();
   const { mode, toggleMode } = useThemeMode();
   const isDark = mode === 'dark';
+  const breadcrumbs = getBreadcrumbs(location.pathname);
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [notificationAnchorEl, setNotificationAnchorEl] = useState<null | HTMLElement>(null);
@@ -115,7 +156,48 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
           </>
         )}
 
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+        {!isMobile && breadcrumbs.length > 0 && (
+          <Box sx={{ display: 'flex', alignItems: 'center', minWidth: 0, mr: 2 }}>
+            <Breadcrumbs
+              sx={{
+                '& .MuiBreadcrumbs-separator': {
+                  color: 'text.secondary',
+                },
+              }}
+            >
+              {breadcrumbs.map((item, index) => {
+                const isLast = index === breadcrumbs.length - 1;
+                return isLast ? (
+                  <Typography
+                    key={index}
+                    variant="body2"
+                    color="text.primary"
+                    fontWeight={600}
+                    sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+                  >
+                    {item.label}
+                  </Typography>
+                ) : (
+                  <Link
+                    key={index}
+                    component={RouterLink}
+                    to={item.to || '#'}
+                    variant="body2"
+                    color="text.secondary"
+                    underline="hover"
+                    sx={{ whiteSpace: 'nowrap', fontWeight: 500 }}
+                  >
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </Breadcrumbs>
+          </Box>
+        )}
+
+        <Box sx={{ flexGrow: 1 }} />
+
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
           {/* Theme toggle */}
           <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
             <Tooltip title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}>
@@ -124,11 +206,7 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
               </IconButton>
             </Tooltip>
           </motion.div>
-        </Box>
 
-        <Box sx={{ flexGrow: 1 }} />
-
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
             <IconButton color="inherit" sx={{ ml: 1 }} onClick={handleNotificationMenuOpen}>
               <Badge

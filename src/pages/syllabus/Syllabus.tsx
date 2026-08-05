@@ -137,10 +137,6 @@ const Syllabus = () => {
             icon: <BookOpen size={20} />,
           },
         ]}
-        breadcrumbs={[
-          { label: 'Dashboard', to: '/' },
-          { label: 'Syllabus' }
-        ]}
       />
       <AnimatedCard>
         <Box sx={{ p: 2 }}>

@@ -144,10 +144,6 @@ const Batches = () => {
             variant: 'outlined',
           },
         ]}
-        breadcrumbs={[
-          { label: 'Dashboard', to: '/' },
-          { label: 'Batches' }
-        ]}
       />
       <AnimatedCard>
         <Box sx={{ p: 2 }}>

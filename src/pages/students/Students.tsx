@@ -190,10 +190,6 @@ const Students: React.FC = () => {
             icon: <User size={20} />,
           },
         ]}
-        breadcrumbs={[
-          { label: 'Dashboard', to: '/' },
-          { label: 'Students' },
-        ]}
       />
       <AnimatedCard>
         <Box sx={{ p: 2 }}>

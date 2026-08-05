@@ -247,11 +247,6 @@ const BatchOverview: React.FC = () => {
       <PageHeader
         title={`Batch #${batch?.id || ''} Overview`}
         subtitle={batch?.mentor ? `Mentor: ${batch.mentor}` : ''}
-        breadcrumbs={[
-          { label: 'Dashboard', to: '/' },
-          { label: 'Batches', to: '/batches' },
-          { label: `Batch #${batch?.id}` },
-        ]}
       />
       <AnimatedCard>
         {loading ? (

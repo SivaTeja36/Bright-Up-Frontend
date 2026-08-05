@@ -128,10 +128,6 @@ const Users = () => {
             icon: <UsersIcon size={20} />,
           },
         ]}
-        breadcrumbs={[
-          { label: 'Dashboard', to: '/' },
-          { label: 'Users' },
-        ]}
       />
       <AnimatedCard>
         <Box sx={{ p: 2 }}>

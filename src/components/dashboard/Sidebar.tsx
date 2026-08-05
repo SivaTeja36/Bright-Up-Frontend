@@ -11,7 +11,6 @@ import {
   IconButton,
   useTheme,
   useMediaQuery,
-  Avatar,
 } from '@mui/material';
 import {
   Home,
@@ -97,7 +96,6 @@ const Sidebar = ({ open, onClose }: SidebarProps) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const { logout } = useAuth();
-  const isDark = theme.palette.mode === 'dark';
 
   const sidebarItems = [
     {
@@ -239,38 +237,6 @@ const Sidebar = ({ open, onClose }: SidebarProps) => {
 
       {/* Bottom section */}
       <Box sx={{ p: 2 }}>
-        <Box
-          sx={{
-            p: 1.5,
-            borderRadius: 3,
-            background: isDark
-              ? 'rgba(59, 130, 246, 0.12)'
-              : 'rgba(37, 99, 235, 0.06)',
-            border: `1px solid rgba(37, 99, 235, ${isDark ? 0.3 : 0.15})`,
-            mb: 1.5,
-          }}
-        >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            <Avatar
-              sx={{
-                width: 36,
-                height: 36,
-                background: `linear-gradient(135deg, ${theme.palette.primary.dark}, ${theme.palette.secondary.main})`,
-              }}
-            >
-              <User size={18} />
-            </Avatar>
-            <Box sx={{ minWidth: 0, flexGrow: 1 }}>
-              <Typography
-                variant="body2"
-                fontWeight={700}
-                sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: 'text.primary' }}
-              >
-                Admin
-              </Typography>
-            </Box>
-          </Box>
-        </Box>
         <ListItemButton
           onClick={logout}
           sx={{

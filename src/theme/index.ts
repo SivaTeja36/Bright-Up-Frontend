@@ -226,18 +226,18 @@ export const getTheme = (mode: ThemeMode) => {
             },
           },
           containedPrimary: {
-            background: tokens.navGradient,
+            backgroundColor: tokens.primaryMain,
             boxShadow: `0px 6px 18px rgba(37, 99, 235, 0.35)`,
             '&:hover': {
-              background: tokens.navGradient,
+              backgroundColor: tokens.primaryDark,
               boxShadow: `0px 10px 24px rgba(37, 99, 235, 0.45)`,
             },
           },
           containedSecondary: {
-            background: `linear-gradient(135deg, ${tokens.secondaryMain} 0%, ${tokens.primaryLight} 100%)`,
+            backgroundColor: tokens.secondaryMain,
             boxShadow: `0px 6px 18px rgba(14, 165, 233, 0.35)`,
             '&:hover': {
-              background: `linear-gradient(135deg, ${tokens.secondaryDark} 0%, ${tokens.secondaryMain} 100%)`,
+              backgroundColor: tokens.secondaryDark,
               boxShadow: `0px 10px 24px rgba(14, 165, 233, 0.45)`,
             },
           },
